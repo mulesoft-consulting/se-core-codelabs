@@ -1,0 +1,127 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Anypoint Code Builder Walk-throughs - Use Case 2: Scaffold an API</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="anypoint-code-builder-walk-throughs-use-case-2-scaffold-an-api"
+                  title="Anypoint Code Builder Walk-throughs - Use Case 2: Scaffold an API"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=anypoint-code-builder-walk-throughs-use-case-2-scaffold-an-api">
+    
+      <google-codelab-step label="Anypoint Code Builder - Use Case 2 : Scaffold an API" duration="0">
+        <p>In this section we will cover how to scaffold an API with<strong> Anypoint Code Builder</strong></p>
+<h2 is-upgraded>What you&#39;ll build</h2>
+<p>In this codelab we will be covering the scaffolding of an API following these steps: </p>
+<ul>
+<li>Authenticating against the Anypoint Platform</li>
+<li>Create API Implementation from Scratch</li>
+<li>Add API as dependency from Exchange</li>
+<li>Scaffolding <a href="https://anypoint.mulesoft.com/exchange/org.mule.module/wtw-radar-live-management-api/" target="_blank"><em>WTW Radar Management API</em></a></li>
+</ul>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<p>These steps will walk you through the scaffolding of a previously built API in  Anypoint Code Builder. You will learn:</p>
+<ul>
+<li>How the complete the scaffolding of an API in Anypoint Code Builder</li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<p>A working <strong>Anypoint Code Builder </strong>installation.</p>
+<aside class="warning"><p><strong>Note</strong>:<br>Some screenshots in this document are from the web experience using the docker image, and some are from Anypoint Code Builder running in a local Visual Studio Code installation (setup details for this will be provided soon). There are only a few UI differences that should be easy to extrapolate.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 2-0: Review extension for APIs" duration="0">
+        <p>Click in the activity bar, type @installed and identify <strong>Mule DX Dev Component</strong> which centralize all capabilities for building integrations. Also <strong>Mule DX - Mule Runtime </strong>bundle the latest version of the runtime.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/952cbe7f640c2f86.png"></p>
+<p>Explore all tabs and details </p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 2-1: Create a Mule Project" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will guide you through on the creation of a project using Anypoint Code Builder and explore some xml warnings that will pop-up on the main file. </p>
+<h2 is-upgraded>Requirements</h2>
+<p>The basic requirement is to have access to Anypoint Code builder and an Anypoint Platform account to access the assets you will scaffold. </p>
+<h2 is-upgraded>Getting Started </h2>
+<p>Open command palette and search for Create Project </p>
+<p class="image-container"><img style="width: 597.50px" src="img/35daee36ade92dd3.png"></p>
+<p>Alternatively, expand &#34;PROJECTS&#34; and select &#34;Create a Project&#34;</p>
+<p class="image-container"><img style="width: 361.50px" src="img/f4dd01a5d4481a02.png"></p>
+<p>Select &#34;Mule Project Type&#34; <img style="width: 27.57px" src="img/360ee3ec7338c06a.png">, this will generate the folder structure of a MuleSoft project</p>
+<p class="image-container"><img style="width: 624.00px" src="img/53e42d019e006195.png"></p>
+<p>Complete <em>Project Name, runtime versions </em>(default) and<em> location</em> (default)</p>
+<p class="image-container"><img style="width: 624.00px" src="img/cab4a08096c9bf69.png"></p>
+<p>Explore the project structure. </p>
+<p>Open my-first-api.xml file</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7dcaada5dc034e31.png"></p>
+<p>At this point you can see 3 warnings on my-first-api-in-pink-panther.xml configuration file (use F8 to jump to the next error in the editor).</p>
+<p>If you place the cursor over those errors you will see an option to &#34;View Problem&#34; (this case UNUSED_NAMESPACE) or &#34;Quick Fix&#34; action item.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/610d85a8b6efca4f.png"><br></p>
+<aside class="warning"><p><strong>Note:</strong> You can open Problems View (⇧⌘FM) to see them together and navigate through the document.   </p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 2-2: Add an API as a dependency from Exchange and Scaffold" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section you will connect with your Anypoint Platform account and will download an Exchange asset as a dependency of your project. </p>
+<h2 is-upgraded>Requirements</h2>
+<p>The basic requirement is to have access to Anypoint Code builder and an Anypoint Platform account to access the assets you will scaffold. </p>
+<h2 is-upgraded>Getting Started </h2>
+<p>Go back to your previous project with the command Open Folder and selecting the mule application folder</p>
+<p>As we will be searching in Anypoint Platform, log in if not already done so</p>
+<p class="image-container"><img style="width: 408.60px" src="img/197f3b27291af6b3.png"></p>
+<p>Alternatively, double click the status bar at the bottom right to log in</p>
+<p>Search for an API in Exchange</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e627e6d79f4eb31.png"></p>
+<p>Select Rest API and continue</p>
+<p class="image-container"><img style="width: 624.00px" src="img/22f6284760ed8adc.png"></p>
+<p>Complete the field to search and type enter</p>
+<p class="image-container"><img style="width: 624.00px" src="img/994bfcdcc2babef2.png"></p>
+<p>Select the API and pick a version , in this example we are using WTW Radar Live Management API, a public asset provided by MuleSoft</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ccf8fec6f6941c2c.png"></p>
+<p>The dependency will be added to the pom.xml file</p>
+<p class="image-container"><img style="width: 403.00px" src="img/36ff65e166250ef5.png"></p>
+<p>Click <em>Yes</em> when asked if you want to scaffold the API Dependency</p>
+<p class="image-container"><img style="width: 624.00px" src="img/97d6e788b79ce16d.png"></p>
+<p>If the scaffolding is successful, you will see this message</p>
+<p class="image-container"><img style="width: 624.00px" src="img/eee86f1c8668edbc.png"><br></p>
+<p>A new xml file has been created with the scaffolding results<br><br><img style="width: 624.00px" src="img/a3c54177fb17c801.png"></p>
+<p>Add the dataweave dependencies to the pom.xml file as described in Code Labs XXX<br></p>
+<p>Now you are ready to add connectors and implement your API.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

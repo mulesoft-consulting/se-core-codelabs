@@ -1,0 +1,28 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-04-05T12:55:39Z",
+  "id": "anypoint-code-builder-developer-preview-set-up",
+  "duration": 11,
+  "title": "Anypoint Code Builder Developer preview set up",
+  "authors": "Yoshihiro Mitsutomi",
+  "summary": "Anypoint Code Builder Developer Preview is available to those participating preview testing. This lab lets you set up Anypoint Code Builder and review its look and feel.",
+  "source": "1t_x86qTlwsvJUB4JM9CqO-rZhss3Pgj0-JIzgJiV8Qg",
+  "theme": "pinkpanther",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "pinkpanther"
+  ],
+  "tags": [
+    "",
+    "anypointcodebuilder",
+    "core"
+  ],
+  "feedback": "https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url\u0026entry.530463766=introduction-welcome-to-anypoint-code-builder-developer-preview",
+  "ga": "{{labAnalytics}}",
+  "url": "anypoint-code-builder-developer-preview-set-up"
+}

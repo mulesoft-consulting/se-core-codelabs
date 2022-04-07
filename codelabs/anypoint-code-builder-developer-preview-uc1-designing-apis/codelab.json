@@ -1,0 +1,28 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-04-05T13:07:14Z",
+  "id": "anypoint-code-builder-developer-preview-uc1-designing-apis",
+  "duration": 0,
+  "title": "Anypoint Code Builder Walk-throughs - Use Case 1: Designing APIs",
+  "authors": "Fernando Koch",
+  "summary": "Use case 1: Designing APIs with Anypoint Code Builder",
+  "source": "1jjY1X40cK46zzM-bXzjjK8WXqEbqxhIc_4bEklYj95c",
+  "theme": "pinkpanther",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "pinkpanther"
+  ],
+  "tags": [
+    "",
+    "anypointcodebuilder",
+    "core"
+  ],
+  "feedback": "https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url\u0026entry.530463766=anypoint-code-builder-developer-preview-uc1-designing-apis",
+  "ga": "{{labAnalytics}}",
+  "url": "anypoint-code-builder-developer-preview-uc1-designing-apis"
+}

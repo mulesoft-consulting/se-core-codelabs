@@ -1,0 +1,27 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-04-05T13:07:55Z",
+  "id": "anypoint-code-builder-walk-throughs-use-case-2-scaffold-an-api",
+  "duration": 0,
+  "title": "Anypoint Code Builder Walk-throughs - Use Case 2: Scaffold an API",
+  "authors": "Paulina Cajiao Alvarado",
+  "summary": "Summary",
+  "source": "1wsikUmWtIxzZOaqdNjS3OOSivBlqrTjlW7kbnRwExck",
+  "theme": "pinkpanther",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "pinkpanther"
+  ],
+  "tags": [
+    "anypointcodebuilder",
+    "core"
+  ],
+  "feedback": "https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url\u0026entry.530463766=anypoint-code-builder-walk-throughs-use-case-2-scaffold-an-api",
+  "ga": "{{labAnalytics}}",
+  "url": "anypoint-code-builder-walk-throughs-use-case-2-scaffold-an-api"
+}
