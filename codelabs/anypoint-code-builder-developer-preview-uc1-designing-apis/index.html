@@ -1,0 +1,302 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Anypoint Code Builder Walk-throughs - Use Case 1: Designing APIs</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="anypoint-code-builder-developer-preview-uc1-designing-apis"
+                  title="Anypoint Code Builder Walk-throughs - Use Case 1: Designing APIs"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=anypoint-code-builder-developer-preview-uc1-designing-apis">
+    
+      <google-codelab-step label="Anypoint Code Builder - Use Case 1: Designing APIs" duration="0">
+        <p>In this section we will cover designing APIs with <strong>Anypoint Code Builder</strong>.</p>
+<h2 is-upgraded>What you&#39;ll build</h2>
+<p>In this codelab, we will be covering the life-cycle of an API. Specifically, you will</p>
+<ul>
+<li>Authenticate against the Anypoint Platform</li>
+<li>Create your first API from scratch</li>
+<li>Add dependencies to it</li>
+<li>Sync your API with Design Center (GIT operations)</li>
+<li>Import an API Project from Design Center</li>
+<li>Create Fragments from scratch</li>
+<li>Write API specifications with RAML or OAS</li>
+<li>View auto-generated, interactive documentation in the API console</li>
+<li>Build API specifications using prebuilt and reusable API fragments</li>
+<li>Validate designs with the Mocking Service </li>
+<li>Publish and share your API in Anypoint Exchange </li>
+</ul>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<p>These steps will walk you through the test scenarios for Anypoint Code Builder. You will learn:</p>
+<ul>
+<li>How the complete API life-cycle works in Anypoint Code Builder</li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<p>A working <strong>Anypoint Code Builder </strong>installation.</p>
+<aside class="warning"><p><strong>Note</strong>:<br>Some screenshots in this document are from the web experience using the docker image, and some are from Anypoint Code Builder running in a local Visual Studio Code installation (setup details for this will be provided soon). There are only a few UI differences that should be easy to extrapolate.</p>
+</aside>
+<p class="image-container"><img style="width: 624.00px" src="img/6fbee586ab5e55d9.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 1-0: Review extension for APIs" duration="0">
+        <ul>
+<li>Click in the activity bar, type <code>@installed</code> and identify <strong>Mule DX API Component</strong> which centralizes all capabilities for Designing APIs</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/89d2826fc963fb2a.png"></p>
+<ul>
+<li>Explore all tabs and details</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 1-1: Use Anypoint Code Builder to define an API with RAML" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will learn how to use Anypoint Code Builder to edit an API Specification. For this purpose, we will first step up our working space and then we will create a new API project.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>If you have access to the &#34;<a href="https://anypoint.mulesoft.com/exchange/portals/muletraining/" target="_blank">American Flights API</a>&#34; available in the <a href="https://anypoint.mulesoft.com/exchange/portals/muletraining/" target="_blank">Training Portal</a> you can use it for this and the following sections. Otherwise, feel free to create your own specification. If you need a starting one, you can use the following:</p>
+<h3 is-upgraded>Example API</h3>
+<pre><code>#%RAML 1.0
+title: Hello API
+baseUri: http://localhost:8081
+mediaType:
+ - application/json
+version: v1
+protocols:
+ - HTTP
+/hello:
+ get:
+   displayName: Say Hello
+   responses:
+     &#34;200&#34;:
+       body:
+         properties:
+           message:
+             example: Hello, world!
+             type: string</code></pre>
+<h2 is-upgraded>Getting Started</h2>
+<p>As mentioned in the requirements above, you can use the &#34;<a href="https://anypoint.mulesoft.com/exchange/portals/muletraining/" target="_blank">American Flights API</a>&#34; from the fundamentals training for this exercise (that&#39;s where the screenshots are from) or create your own API / copy the example found in the <em>Requirements</em> section.</p>
+<h2 is-upgraded>Setting up Anypoint Code Builder</h2>
+<h3 is-upgraded>Showing the Output Panel</h3>
+<p>If you haven&#39;t done so before, click <code>View > Output</code></p>
+<p class="image-container"><img style="width: 430.00px" src="img/d02c3981c9b90f55.png"> </p>
+<p>Alternatively, open the <strong>Output panel</strong> from the command palette (<em>OSX</em>: ⌘+⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code><strong>)</strong><img style="width: 624.00px" src="img/30bb458119b7b894.png"></p>
+<p>In <strong>Output</strong>, select <strong>Mule DX Server</strong> from the drop down menu:</p>
+<p class="image-container"><img style="width: 391.50px" src="img/92ad4ca336b568e8.png"></p>
+<h3 is-upgraded>Logging into the Anypoint Platform</h3>
+<p>Log into the <em>Anypoint platform</em> by double clicking <strong>Not logged in</strong> at the bottom right:</p>
+<p class="image-container"><img style="width: 321.50px" src="img/d2cebbf69471989c.png"></p>
+<p>Enter your <em>Anypoint</em> username and hit return:</p>
+<p class="image-container"><img style="width: 320.50px" src="img/18b5bc79060da5fc.png"></p>
+<p>Enter your <em>Anypoint </em>password and hit return:</p>
+<p class="image-container"><img style="width: 320.50px" src="img/c3b7e53cb1c1fcff.png"></p>
+<p>You should then see your username at the bottom right:</p>
+<p class="image-container"><img style="width: 320.50px" src="img/80a6b855cc515d7a.png"></p>
+<aside class="warning"><p><strong>Note: </strong>Multi-Factor Authentication (MFA) is on the roadmap for Pink Panther, but not currently supported. If you previously setup MFA for Anypoint Platform, you will get an error <em>&#34;incorrect username and password&#34;.</em></p>
+</aside>
+<p>Click on <code>View > Command Palette</code> (<em>OSX</em>: ⌘+⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code><strong>)</strong></p>
+<p class="image-container"><img style="width: 488.90px" src="img/d64c4cf2355df5ee.png">        </p>
+<p>If you are using the docker image, it will look like this (if you selected dark mode):</p>
+<p class="image-container"><img style="width: 354.05px" src="img/550566417299d9e4.png"></p>
+<p>Type <code>MuleSoft</code> to list all commands available </p>
+<p class="image-container"><img style="width: 624.00px" src="img/5f12f35c35ec519c.png"></p>
+<p>Select <strong>Mulesoft: Create a Project </strong><img style="width: 28.57px" src="img/d917550e942de14b.png"> and then select<strong> API Specification:</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/16bf26ba49b03a85.png"></p>
+<ul>
+<li>Enter your credentials if not already done so</li>
+<li>Complete a valid <em>Project name</em> (invalid characters are not allowed) and then <em>Project Description</em></li>
+<li>Select <em>New API Specification </em>(<strong>TIP</strong>: type <code>enter</code> to move forward with the selected option)</li>
+<li>Select <em>RAML 1.0</em></li>
+<li>Select a location to store the new project - make sure the location exists</li>
+<li>You will see a confirmation at the bottom right</li>
+</ul>
+<p class="image-container"><img style="width: 572.50px" src="img/4033a7488c181a57.png"></p>
+<p>The creation process may take a little while, watch the messages in the output window. On the left panel, you will find the <strong>Package Explorer</strong> and <strong>Outline</strong>, in the center you will see the main editor. To open the <strong>API Console</strong>, click on the left icon (icon row on the top right):</p>
+<p class="image-container"><img style="width: 99.00px" src="img/2081a1ff65a11752.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/4e7729de8b5ca607.png"></p>
+<p>A notification will appear at the bottom of the screen, the Mocking Service is turned on by default (this will be used in next steps) </p>
+<p class="image-container"><img style="width: 562.00px" src="img/a37081cdd55fb860.png"></p>
+<h2 is-upgraded>Designing your API</h2>
+<p>You can now start designing your API, using <code>ctrl+space</code> for auto completion:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3b3f78009b1bf026.png"></p>
+<p>Look around the environment and note the </p>
+<ol type="1" start="1">
+<li>Open Editors</li>
+<li>Project structure</li>
+</ol>
+<p class="image-container"><img style="width: 624.00px" src="img/741e50403ff3b5c8.png"></p>
+<p>The current version of the API Editor supports the following specification types:</p>
+<ul>
+<li>Raml 1.0</li>
+<li>Raml 0.8</li>
+<li>OpenApi 2.0</li>
+<li>OpenApi 3.0</li>
+</ul>
+<p>Other key features include:</p>
+<ul>
+<li><strong>Outline</strong> and <strong>Minimap</strong></li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/e14da6d982d94399.png"></p>
+<ul>
+<li>Syntax Highlighting, similar to <strong>Design Center</strong></li>
+<li>Code completion based on API specification</li>
+<li>Code folding/unfolding</li>
+</ul>
+<p class="image-container"><img style="width: 307.43px" src="img/b511509178ccccee.png"></p>
+<ul>
+<li>Hovering over elements to get additional information</li>
+<li>Validations based on API Specs and context</li>
+<li>Goto definitions</li>
+<li>Syntax validations</li>
+</ul>
+<p class="image-container"><img style="width: 614.44px" src="img/252411f006040070.gif"></p>
+<p>Validations run on the fly showing issues in red in the Editor, Minimap, Package Explorer and Outline.</p>
+<aside class="special"><p><strong>Tip: </strong>You can format your API specification by opening the <strong>Command Palette</strong> (<em>OSX</em>: ⌘+⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code><strong>)</strong> and choosing <strong>Format Document</strong></p>
+</aside>
+<p>If you haven&#39;t done so yet, click on the <strong>Computer Icon</strong> on the right top section to view auto-generated, interactive documentation in the API Console</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7f27c62a23bfa7fa.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/feade33ca99664b9.png"></p>
+<h2 is-upgraded>Syncing your changes with Design Center</h2>
+<p>Note that the Mocking Service status indicator has changed: it is now warning about local changes not yet pushed. These changes must be synced with VCS to test them with the <strong>Mocking Service</strong>:</p>
+<p class="image-container"><img style="width: 377.00px" src="img/6670837ff100c195.png"></p>
+<p>Click on the <strong>MS status indicator</strong> or the <strong>Source Control - Pending Changes</strong> which will present a number with the amount of local changes:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/55ecd60c72fe77cb.png"></p>
+<p class="image-container"><img style="width: 400.50px" src="img/27302036d4a0deaf.png"></p>
+<p>Click the <code>+</code> button to stage the changes:</p>
+<p class="image-container"><img style="width: 406.85px" src="img/aeacad590d892b3f.png"></p>
+<p>You can click on the file to view differences with the VCS (sync with <strong>Design Center</strong>)</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b65df08f9c0dd549.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/63181b083da4de70.png"></p>
+<p>Enter a commit message and confirm using the ✓ <strong>check</strong> button (<em>OSX</em>: <code>⌘+Enter</code>)</p>
+<p class="image-container"><img style="width: 314.50px" src="img/d4d46ffff25d9edf.png"></p>
+<p>Open the Source Control menu by clicking on the <strong>three dots</strong> (...)  and select the <code>Push</code> option:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/adf3042db1010e0f.png"></p>
+<p class="image-container"><img style="width: 399.50px" src="img/13162e43fdb347dd.png"></p>
+<p>You have successfully synchronized your changes with <strong>Design Center</strong> - congratulations! In the next section, we will take a look at using the Mocking Service to test the API.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 1-2: Use the mocking service to test an API" duration="0">
+        <aside class="warning"><p><strong>Known limitations:<br></strong></p>
+<ul>
+<li>Anypoint Code Builder includes a remote <strong>Mocking Service</strong>, provided by the <strong>Anypoint Platform</strong>. All local changes <strong>must</strong> be synchronized (via source control) with VCS in order to test the API with the <strong>Mocking Service</strong>. In the future the idea is to provide a <a href="https://www.mulesoft.org/jira/browse/MSERV-1286" target="_blank">Local Mocking Service</a><br></li>
+<li>After the API Console was opened the first time, a notification appears at the bottom of the screen to indicate that the mocking service was turned on:<img style="width: 488.50px" src="img/a37081cdd55fb860.png"></li>
+</ul>
+</aside>
+<p>To test your newly created API, first open the API console then click on the <code>GET</code> resource to begin</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c2ac4ab7896893e9.png"></p>
+<p>Click on the <code>Try it</code> button on the right-hand side and select or add any parameters, if necessary</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d4b2dc779341883f.png"></p>
+<p>Press <code>Send</code> and see results in the API Console, as follows. If your API has any examples, you should see that as the result of the invocation</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ab56643263ad9500.png"></p>
+<p>You have finished this section! In the next walkthrough we will learn how you add request and response details using pre-built and reusable API fragments.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 1-3: Add request and response details using pre-built and reusable API fragments" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will add existing dependencies from <strong>Anypoint Exchange</strong>.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>You will need to have an API Library that can be imported from Anypoint Exchange.</p>
+<h2 is-upgraded>Getting Started</h2>
+<p>Open the <strong>Command palette </strong>(<em>OSX</em>: ⌘+⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code><strong>)</strong> and select &#34;<em>MuleSoft: Add Fragment dependency from Exchange</em>&#34;</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e7637a337ec9af37.png"></p>
+<p>Enter the name of the fragment you want to import. If you are following the example from Training, start typing the name of your dependency, e.g. &#34;<em>American Flight</em>&#34;</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c376a255df91a72b.png"></p>
+<p>If a dependency is found, <strong>Anypoint Code Builder</strong> will list all the available versions that can be found in <strong>Anypoint Exchange</strong>. Select the correct dependency and then select the project to add the dependency to, as shown below</p>
+<p class="image-container"><img style="width: 624.00px" src="img/12705181f115c34e.png"></p>
+<p>If the dependency has been correctly added, you will see the message &#34;<em>Dependencies added to POM</em>&#34;</p>
+<p class="image-container"><img style="width: 393.40px" src="img/3e74bd74f701de1c.png"></p>
+<p>The dependency is now also shown In the Explorer view: you will find the assets downloaded - but not editable - as shown below:</p>
+<p class="image-container"><img style="width: 323.83px" src="img/db299e8aaa36cbd2.png"></p>
+<p>You can repeat the steps above to add any other dependency to this or other projects. Note that you can also see the dependencies under the <strong>Project Dependencies view</strong> on the left-hand side panel:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/563de53119255dbb.png"></p>
+<p>Back in the main editor, you can now continue with your API design. Start by adding a <code>types</code> root-level element - as shown below - using auto complete, enter a name for the library and add the full path of the dependency:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/533e83797b048440.png"></p>
+<p>If you are using the <strong>Training library</strong>, you can return a <code>array</code> of <code>AmericanFlight</code> objects as the return data type for the <code>/flights:get</code> resource, as follows:</p>
+<p class="image-container"><img style="width: 438.13px" src="img/f8418112569d1e9c.png"></p>
+<p>If your library has any examples, you can add these in the same way as shown above. After you have finished with your changes, remember to commit and push the changes.</p>
+<p>Finally, check out the <strong>Mocking Service</strong> again: when we press <code>Send</code>, we can now see the proper results:</p>
+<p class="image-container"><img style="width: 314.00px" src="img/bebeca197fa60fd.png"></p>
+<p>Congratulations on finishing this section! In the next one, we will learn how to publish your specification to <strong>Anypoint Exchange</strong> in <strong>Anypoint Code Builder</strong>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 1-4: Publish an API to Anypoint Exchange" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will publish an API created with Anypoint Code Builder to <strong>Anypoint Exchange</strong>.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>You will need </p>
+<ul>
+<li>An API project created in Anypoint Code Builder to publish</li>
+<li>Make sure the <strong>Output view</strong> is open - you can do this by opening the <strong>Command palette</strong> (<em>OSX</em>: ⌘+⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code>) and selecting <strong>Focus on Output View</strong>. </li>
+</ul>
+<aside class="warning"><p><strong>Note: </strong>Before publishing to <strong>Anypoint Exchange</strong> you have to be sure that there are no modifications in the <code>raml</code> file or <code>exchange.json</code> files. If there are any modifications that were not pushed to VSC, you have to push them before publishing. </p>
+</aside>
+<h2 is-upgraded>Getting Started</h2>
+<p>Open the <strong>Command palette</strong> (<em>OSX</em>: ⌘+⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code>) and select the option <em>MuleSoft Publish</em><img style="width: 624.00px" src="img/8a51a9131566f34c.png"></p>
+<p>Enter a valid <strong>Project Name </strong>(invalid characters will be rejected) or press <code>enter</code> to select a suggested one. Set a valid <em>Artifact ID </em>(again, invalid characters will be rejected) and a valid <em>Asset Version </em>(and again, invalid characters will be rejected) - Anypoint Code Builder will suggest a version based on the latest published one found in <strong>Anypoint Exchange</strong>.</p>
+<p>Finally, enter an <em>API Version</em>. Afterwards<em>, </em>you should see the &#34;<em>Publishing API Specification to Exchange</em>&#34; appear on the screen</p>
+<p class="image-container"><img style="width: 399.00px" src="img/fcded5207eb24408.png"></p>
+<p>You will be able to see the progress of this task if you select the <em>Mule DX Server</em> task in the <strong>Output View.</strong> A notification will also be shown when the publishing process is complete:</p>
+<p>Congratulations! You just finished another section. In our last section for this set of use-cases, we will learn how to import an existing API specification from <strong>Anypoint Exchange</strong>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 1-5: Import API specification from Design Center" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p> In this section we will learn how to import an existing API specification from <strong>Anypoint Exchange</strong>.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>You will need to have an API specification published in Anypoint Exchange that can be imported into <strong>Anypoint Code Builder</strong>.</p>
+<h2 is-upgraded>Getting Started</h2>
+<p>Go to <strong>Design Center</strong> in the <strong>Anypoint Platform</strong> and open an existing project </p>
+<p class="image-container"><img style="width: 624.00px" src="img/accec7e05e633faa.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d56721e305def5e5.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/c6ae85d3240e027f.png"></p>
+<p>In <strong>Anypoint Code Builder</strong>, click on <code>File > New Window</code> to open a new tab</p>
+<p class="image-container"><img style="width: 422.50px" src="img/5edf1002f14ccb2b.png"></p>
+<p>Open the <strong>Command palette </strong>(<em>OSX</em>: ⌘+⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code>) and search <em>MuleSoft Import</em> and select the option <em>MuleSoft: Import API Specification Project</em></p>
+<h2 is-upgraded><img style="width: 624.00px" src="img/409088e02c8ef7ef.png"></h2>
+<p>If you are not already logged into the <strong>Anypoint Platform</strong>, enter both your <code>username</code> and <code>password</code> to login; afterwards you should see the API you previously opened in <strong>Design Center</strong> in the list of available items</p>
+<p class="image-container"><img style="width: 391.00px" src="img/9beafcae2333f515.png"></p>
+<p>Finally, choose the API you would like to import. The API specification will then be ready for editing, as shown below.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/7e5b1885062ee077.png"></p>
+<p>You have reached the end of this walkthrough - congratulations! You can now go back and take a look at the other available code labs for Anypoint Code Builder. If you have any questions or feedback, please send an email to... ?</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

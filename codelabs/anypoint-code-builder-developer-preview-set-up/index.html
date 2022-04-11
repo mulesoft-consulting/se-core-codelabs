@@ -1,0 +1,157 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Anypoint Code Builder Developer preview set up</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="anypoint-code-builder-developer-preview-set-up"
+                  title="Anypoint Code Builder Developer preview set up"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=introduction-welcome-to-anypoint-code-builder-developer-preview">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <h2 is-upgraded>Overview</h2>
+<p>Welcome to <strong>Anypoint Code Builder</strong> (aka Pink Panther) developers preview walkthrough! Anypoint Code Builder is the next generation IDE for MuleSoft Application and API Specification. The IDE is developed on top of one of the most used IDEs among developers, VS Code.  Anypoint Code Builder developers preview is now available to those participating in the testing.</p>
+<p>In this section, we will set up <strong>Anypoint Code Builder</strong> developers preview for following codelabs.</p>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<ul class="checklist">
+<li>How to set up Anypoint Code Builder developers preview.</li>
+<li>Review its look and feel.</li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Docker - you can install it from <a href="https://www.docker.com/get-started/" target="_blank"><paper-button class="colored" raised>here</paper-button></a></li>
+<li>Anypoint Platform Account</li>
+<li>Sign up Anypoint Code Builder developers preview program - Contact <a href="mailto:john.lanuti@mulesoft.com" target="_blank"><paper-button class="colored" raised>John Lanuti</paper-button></a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Installation" duration="5">
+        <p>In this section, we&#39;ll download the docker image for Anypoint Code Builder and load it on your environment.</p>
+<h3 is-upgraded>Download Anypoint Code Builder image</h3>
+<p>Download the image from <a href="https://drive.google.com/file/d/1a26QGtn_3N_VPLNSBBfQmMQzPqxP2B7O/view?usp=sharing" target="_blank">here</a>.</p>
+<aside class="warning"><p><strong>Note: </strong>The image is the latest one as of April 4th, 2022. Check <a href="https://sites.google.com/mulesoft.com/pinkpantherinsiderpreviews1#h.w4idkvgpfplj" target="_blank">here</a> to find the latest version.</p>
+</aside>
+<h3 is-upgraded>Start up docker desktop/daemon</h3>
+<p>Image for docker desktop for Mac.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d05e217bbff406d6.png"></p>
+<h3 is-upgraded>Start up terminal</h3>
+<h3 is-upgraded>Make sure Docker daemon is running</h3>
+<p>Run <code>docker version</code> command to print the version of your docker server engine.</p>
+<p>Sample output(version number should vary by the installation):</p>
+<pre><code>$ docker version
+Client:
+ Cloud integration: v1.0.22
+ Version:           20.10.13
+ API version:       1.41
+ Go version:        go1.16.15
+ Git commit:        a224086
+ Built:             Thu Mar 10 14:08:44 2022
+ OS/Arch:           darwin/amd64
+ Context:           default
+ Experimental:      true
+
+Server: Docker Desktop 4.6.1 (76265)
+ Engine:
+  Version:          20.10.13
+  API version:      1.41 (minimum version 1.12)
+  Go version:       go1.16.15
+  Git commit:       906f57f
+  Built:            Thu Mar 10 14:06:05 2022
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          1.5.10
+  GitCommit:        2a1d4dbdb2a1030dc5b01e96fb110a9d9f150ecc
+ runc:
+  Version:          1.0.3
+  GitCommit:        v1.0.3-0-gf46b6ba
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+$</code></pre>
+<h3 is-upgraded>Go to the directory where downloaded image is located</h3>
+<p>Use <code>cd</code> command to change the current directory.</p>
+<h3 is-upgraded>Install the image onto your machine</h3>
+<p>Hit the command following to unzip the image and load it to your docker(Note: the version may differ if you download the newer image.):</p>
+<pre><code>$ gunzip -c ~/Downloads/mule-dx-dist-v23.1.3.tar.gz | docker load</code></pre>
+<p>When installation is successfully completed, you can verify it on your docker desktop like below:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ee3f02326207edf5.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Start up Anypoint Code Builder" duration="3">
+        <h3 is-upgraded>Open up the terminal if you don&#39;t open it</h3>
+<h3 is-upgraded>Hit the command to start it up</h3>
+<p>Hit the command below. It run the docker image you installed in the previous section. Then it opens up your browser at <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></p>
+<pre><code>$ docker run -i --rm --name mule-dx -d -p8080-8100:8080-8100 -v $HOME:$HOME artifacts.msap.io/mulesoft/mule-dx-dist:v23.1.3 &amp;&amp; sleep 3 &amp;&amp; open http://localhost:8080</code></pre>
+<p>You may see a blank page like below. But don&#39;t be freaked. It may take a couple minutes to boot up.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8f38cf85d4f7eff8.png"></p>
+<h3 is-upgraded>Make sure the image is up and running</h3>
+<p>When it successfully starts up, you will see Visual Studio code window like below:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3f54a901cdfe7ce2.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Review Visual Studio Code Extension for Anypoint Code Builder" duration="3">
+        <h3 is-upgraded>Open up extension setting window</h3>
+<p>Hit <strong>Shift + Command + X</strong> key or navigate to <strong>Configuration &gt; Extensions</strong></p>
+<p class="image-container"><img style="width: 550.00px" src="img/ed017ff4237ccd90.png"></p>
+<h3 is-upgraded>List installed extensions</h3>
+<p>Hit <code>@installed</code> at the search bar</p>
+<p class="image-container"><img style="width: 579.00px" src="img/9a5dd372389eca01.png"></p>
+<h3 is-upgraded>Review the installed extensions</h3>
+<p>Mule related extensions are listed like below:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/3f34eef4e121fa07.png"></p>
+<p>If you want to pause the lab here, you can stop Anypoint Code Builder by following command(If you are ready to proceed the next lab, keep the image running!):</p>
+<pre><code>$ docker stop mule-dx</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="0">
+        <p>In this lab, we have done followings:</p>
+<ul>
+<li>Installed Anypoint Code Builder image</li>
+<li>Started up Anypoint Code Builder image</li>
+<li>Review Visual Code Extension</li>
+</ul>
+<p><strong>Congratulations! Now you are ready to explore Anypoint Code Builder Developers Preview.</strong></p>
+<h2 is-upgraded>What&#39;s next?</h2>
+<p>Head to Codelab 1 - Designing APIs with Anypoint Code Builder</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
