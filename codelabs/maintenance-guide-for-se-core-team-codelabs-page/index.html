@@ -89,7 +89,7 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Add/Update your CodeLab doc onto the site" duration="3">
+      <google-codelab-step label="Add/Update your CodeLab doc onto the source repo" duration="3">
         <p>Our CodeLab site resources are managed on following GitHub repositories:</p>
 <ul>
 <li>Sources: <a href="https://github.com/mulesoft-consulting/se-core-codelabs-sources" target="_blank">https://github.com/mulesoft-consulting/se-core-codelabs-sources</a> </li>
@@ -102,9 +102,8 @@
 <h2 is-upgraded>Clone the source repository</h2>
 <pre><code>$ git clone https://github.com/mulesoft-consulting/se-core-codelabs-sources.git</code></pre>
 <h2 is-upgraded>Generate HTML sources from Google doc file</h2>
-<pre><code># Open codelabs folder and build Codelabs page from Google Doc ID 
-cd codelabs
-claat export &lt;Google Doc ID&gt;</code></pre>
+<pre><code>$ cd codelabs
+$ claat export &lt;Google Doc ID&gt;</code></pre>
 <p>Google Doc ID can be grabbed from URL:</p>
 <p class="image-container"><img style="width: 624.00px" src="img/82eba422e3ea1a6b.png"></p>
 <p>If it is successfully generated, OK is returned.</p>
@@ -151,22 +150,83 @@ claat export &lt;Google Doc ID&gt;</code></pre>
 <p>Sample image:</p>
 <p class="image-container"><img style="width: 624.00px" src="img/fef2c2589094357a.png"></p>
 <p>If everything work as expected, hit <strong>ctrl + C</strong> to stop the instance.</p>
-<h2 is-upgraded>(preview this template to see the markup in action)</h2>
-<p>When you want to put inline code, <code>use the Courier New font like this!</code></p>
-<p>If you want to include a code block, which has a copy button, create a 1x1 table and use the font Courier new:</p>
-<pre><code>//this is a code block
-%dw 2.0
-output application/json
----
-&#34;Hello world!&#34;</code></pre>
-<p>If you want to add a warning block, add a 1x1 table with this background color (3 from the left, and 3 down in the color picker):</p>
-<aside class="warning"><p><strong>WARNING: </strong>If you see an issue with...</p>
-</aside>
-<p>If you want to do a green box, same thing but with this background color:</p>
-<aside class="special"><p><strong>Pro Tip: </strong>In Anypoint Studio 7.10 and beyond you can...</p>
-</aside>
-<p>If you want to include a button instead of a simple link, create a link and set the highlight with this green:</p>
-<p><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank"><paper-button class="colored" raised>This is a button - click me~!</paper-button></a></p>
+<h2 is-upgraded>Build the site</h2>
+<p>Go to parent directory and execute <code>gulp dist</code></p>
+<pre><code>$ cd ../
+$ gulp dist
+[16:02:51] Using gulpfile ~/codelab/se-core-team-codelabs-sources/se-core-codelabs-sources/gulpfile.js
+[16:02:51] Starting &#39;dist&#39;...
+[16:02:51] Starting &#39;build&#39;...
+[16:02:51] Starting &#39;clean&#39;...
+[16:02:51] Starting &#39;clean:build&#39;...
+
+              :
+
+[16:03:07] Finished &#39;minify:js&#39; after 12 s
+[16:03:08] Finished &#39;minify:css&#39; after 13 s
+[16:03:08] Finished &#39;minify:html&#39; after 13 s
+[16:03:08] Finished &#39;minify&#39; after 13 s
+[16:03:08] Finished &#39;dist&#39; after 17 s
+$</code></pre>
+<p>You can ignore the warning message something like this:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/de90952b7a9674f1.png"></p>
+<h2 is-upgraded>Push changes onto the GitHub repository</h2>
+<p>Add, commit, and push the updated resources as you do for your GitHub repository.</p>
+<p>Sample:</p>
+<pre><code>$ git add .
+$ git commit -m &#39;added site update instruction&#39;
+$ git push -u origin master</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Reflect the changes on the code lab web site" duration="3">
+        <p>In this section, we update the web site repo. The web site is automatically updated once you reflect the changes on the repo.</p>
+<h2 is-upgraded>Create a new branch on web site repository</h2>
+<p>Go to <a href="https://github.com/mulesoft-consulting/se-core-codelabs" target="_blank">https://github.com/mulesoft-consulting/se-core-codelabs</a></p>
+<p>Open up branch dropdown on the top left corner and type in the arbitrary branch name. Then hit enter key.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/acf342e5870f4f3b.png"></p>
+<h2 is-upgraded>Open up terminal and go to your work directory</h2>
+<h2 is-upgraded>Clone the website repository on the branch you created</h2>
+<pre><code>$ git clone -b &lt;branch name&gt; https://github.com/mulesoft-consulting/se-core-codelabs.git</code></pre>
+<h2 is-upgraded>Replace all contents with sources under /dist directory in source repo</h2>
+<ol type="1" start="1">
+<li>Delete all files in the website repository</li>
+<li>Copy all files under /dist directory of source repo</li>
+<li>Paste the files</li>
+<li>Replace codelabs folder with physical codelabs folder under https://github.com/mulesoft-consulting/se-core-codelabs-sources/tree/master/codelabs</li>
+</ol>
+<p>Update image:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/1f3cfb1075febfc6.png"></p>
+<h2 is-upgraded>Push changes onto the GitHub repository</h2>
+<p>Add, commit, and push the updated resources as you do for your GitHub repository.</p>
+<p>Sample:</p>
+<pre><code>$ git add .
+$ git commit -m &#39;added site update instruction&#39;
+$ git push -u origin &lt;branch name&gt;</code></pre>
+<h2 is-upgraded>Merge the updated branch onto master branch</h2>
+<p>Go to <a href="https://github.com/mulesoft-consulting/se-core-codelabs" target="_blank">https://github.com/mulesoft-consulting/se-core-codelabs</a></p>
+<p>Click <strong>Compare &amp; pull request</strong> button</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2f930c8c254c0c79.png"></p>
+<p>Click <strong>Create pull request</strong> button</p>
+<p class="image-container"><img style="width: 624.00px" src="img/642fa9779e492f33.png"></p>
+<p>Click <strong>Merge Pull request</strong> button, followed by <strong>Merge</strong> button</p>
+<p class="image-container"><img style="width: 624.00px" src="img/c6c8b1fc66745048.png"></p>
+<p>When it is successfully merged, you see the message something like below:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/f738de926b8c72b2.png"></p>
+<h2 is-upgraded>Check the published page</h2>
+<p>Go to <a href="https://github.com/mulesoft-consulting/se-core-codelabs/settings/pages" target="_blank">https://github.com/mulesoft-consulting/se-core-codelabs/settings/pages</a></p>
+<p>Check and observe a message stating the site is successfully updated.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/4a98f6657c3f0d85.png"></p>
+<p>If you click the url in the message, you can see the published site with access control.</p>
+<h2 is-upgraded>Update custom domain field</h2>
+<p>Fill in <strong>coreteam.mulesoft-labs.dev</strong> in the Custom domain field. Then click <strong>Save</strong> button.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/94191229765be86b.png"></p>
+<p>Make sure you get a message stating the page is successfully published.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/ddcd943110937162.png"></p>
+<h2 is-upgraded>Delete the branch</h2>
+<p>If everything is working as expected, delete the branch.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b000c4dcac51ccca.png"></p>
 
 
       </google-codelab-step>
