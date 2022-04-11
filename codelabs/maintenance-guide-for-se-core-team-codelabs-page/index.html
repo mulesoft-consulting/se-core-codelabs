@@ -1,0 +1,183 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Maintenance Guide for SE Core team CodeLabs page</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="maintenance-guide-for-se-core-team-codelabs-page"
+                  title="Maintenance Guide for SE Core team CodeLabs page"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=maintenance-guide-for-se-core-team-codelabs-page">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <h2 is-upgraded>Overview</h2>
+<p>This is a guide to walk you through how to add or update CodeLabs contents onto <a href="https://coreteam.mulesoft-labs.dev/" target="_blank">CodeLabs page</a> maintained by SE Core Specialist team.</p>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<ul class="checklist">
+<li>How to generate CodeLabs contents source file in Google Doc format</li>
+<li>How to reflect the contents on to CodeLabs page</li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Github account which is accessible to <strong>mulesoft-consulting</strong> organization</li>
+<li>Google Account associated with MuleSoft/Salesforce domain - all MuleSoft employees should have</li>
+<li>Preview codelab Google Chrome plug-in - you can add this from <a href="https://chrome.google.com/webstore/detail/preview-codelab/lhojjnijnkiglhkggagbapfonpdlinji" target="_blank">here</a></li>
+<li>Google Codelab CLI – follow step 1 through 4 on <a href="https://mulesoft-codelabs.herokuapp.com/codelabs/codelab-setup/index.html#0" target="_blank">this lab</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Set up CodeLab Source File" duration="1">
+        <p>In this section, you&#39;ll create a CodeLab Source File in Google Doc format. You can skip this section if you are going to update the contents and you have an access to CodeLab Source File already.</p>
+<h2 is-upgraded>Add MuleSoft Codelabs Slack app </h2>
+<p>If you don&#39;t have MuleSoft Codelabs Slack app, add it on your slack. You can add Slack app by hitting <strong>plus button</strong> next to Apps on your slack window.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e1fcc7cf8ec27a7b.png"></p>
+<p>Search &#34;MuleSoft Codelabs&#34; and choose it to add the app.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/8ba7c70e5d2f6aa.png"></p>
+<p>You will see &#34;Mulesoft Codelabs&#34; in your Apps directory if it is successfully installed.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9cf4a3ba2f1fce56.png"></p>
+<h2 is-upgraded>Create Codelab source file </h2>
+<p>Hit <code>/clb create</code> at MuleSoft Codelabs message window.</p>
+<p>Then a form will be popped up. You fill in all fields and hit <strong>submit</strong> button.</p>
+<p class="image-container"><img style="width: 594.85px" src="img/332f6504d58430b9.png"></p>
+<p>If everything is fine, you get a notification with the link to the generated Codelab template Google doc file. If you miss the message, you can list your files by <code>/clb list</code> and hit <strong>Edit</strong>. </p>
+<p>Sample image:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/16e3f651da80b990.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Edit CodeLab Source File" duration="10">
+        <p>Edit CodeLab Source file you generated at previous step. Its format guide is available in the file you generated. On top of this, a template with a full set of format example is given by Google <a href="https://docs.google.com/document/d/1E6XMcdTexh5O8JwGy42SY3Ehzi8gOfUGiqTiUX6N04o/edit" target="_blank">here</a>:</p>
+<p>Image:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/caa7abd4d342ad44.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Previewing Your Codelab" duration="1">
+        <p>When writing up your code lab, you&#39;ll likely want to preview it before you deploy to the test environment.</p>
+<h2 is-upgraded>Install Google Chrome codelab preview plugin</h2>
+<p>If you haven&#39;t installed it, you can install it from <a href="https://chrome.google.com/webstore/detail/preview-codelab/lhojjnijnkiglhkggagbapfonpdlinji" target="_blank">here</a>.</p>
+<h2 is-upgraded>Install Google Chrome codelab preview plugin</h2>
+<p>If you haven&#39;t installed it, you can install it from <a href="https://chrome.google.com/webstore/detail/preview-codelab/lhojjnijnkiglhkggagbapfonpdlinji" target="_blank">here</a>.</p>
+<h2 is-upgraded>Preview the doc in HTML format</h2>
+<p>Click the shortcut to invoke the preview while Google Doc is opening.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/62d342653645dfe7.png"></p>
+<p>Image: </p>
+<p class="image-container"><img style="width: 624.00px" src="img/2323809e308a62c2.gif"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add/Update your CodeLab doc onto the site" duration="3">
+        <p>Our CodeLab site resources are managed on following GitHub repositories:</p>
+<ul>
+<li>Sources: <a href="https://github.com/mulesoft-consulting/se-core-codelabs-sources" target="_blank">https://github.com/mulesoft-consulting/se-core-codelabs-sources</a> </li>
+<li>WebSites: <a href="https://github.com/mulesoft-consulting/se-core-codelabs" target="_blank">https://github.com/mulesoft-consulting/se-core-codelabs</a> </li>
+</ul>
+<p>On this section, we will transform the google doc file you maintained in the previous section into HTML sources. Then update the GitHub source repository.</p>
+<aside class="warning"><p>In order to generate HTML sources from Google doc, you need codelab CLI. You can install it by following the instruction 1 through 4 of <a href="https://mulesoft-codelabs.herokuapp.com/codelabs/codelab-setup/index.html#0" target="_blank">this lab</a>. If you have a problem in installing it or don&#39;t have a time for it, just share the Google Doc with <a href="mailto:ymitsutomi@mulesoft.com" target="_blank">ymitsutomi@mulesoft.com</a> so that I can handle the rest and you can skip following sections.</p>
+</aside>
+<h2 is-upgraded>Open up terminal and go to your work directory</h2>
+<h2 is-upgraded>Clone the source repository</h2>
+<pre><code>$ git clone https://github.com/mulesoft-consulting/se-core-codelabs-sources.git</code></pre>
+<h2 is-upgraded>Generate HTML sources from Google doc file</h2>
+<pre><code># Open codelabs folder and build Codelabs page from Google Doc ID 
+cd codelabs
+claat export &lt;Google Doc ID&gt;</code></pre>
+<p>Google Doc ID can be grabbed from URL:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/82eba422e3ea1a6b.png"></p>
+<p>If it is successfully generated, OK is returned.</p>
+<p>Sample output:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/fed94e47e9c93d75.png"></p>
+<h2 is-upgraded>Test the site</h2>
+<p>Run <code>gulp serve</code> , then site instance is invoked at http://localhost:8000 </p>
+<pre><code>$ gulp serve
+[15:47:00] Working directory changed to ~/codelab/se-core-team-codelabs-sources/se-core-codelabs-sources
+[15:47:02] Using gulpfile ~/codelab/se-core-team-codelabs-sources/se-core-codelabs-sources/gulpfile.js
+[15:47:02] Starting &#39;serve&#39;...
+[15:47:02] Starting &#39;build&#39;...
+[15:47:02] Starting &#39;clean&#39;...
+[15:47:02] Starting &#39;clean:build&#39;...
+[15:47:02] Starting &#39;clean:dist&#39;...
+[15:47:02] Finished &#39;clean:build&#39; after 2.97 ms
+[15:47:02] Finished &#39;clean:dist&#39; after 62 ms
+[15:47:02] Finished &#39;clean&#39; after 63 ms
+[15:47:02] Starting &#39;build:codelabs&#39;...
+[15:47:02] Finished &#39;build:codelabs&#39; after 1.28 ms
+[15:47:02] Starting &#39;build:css&#39;...
+[15:47:02] Finished &#39;build:css&#39; after 21 ms
+[15:47:02] Starting &#39;build:scss&#39;...
+[15:47:02] Finished &#39;build:scss&#39; after 93 ms
+[15:47:02] Starting &#39;build:html&#39;...
+[15:47:03] Finished &#39;build:html&#39; after 303 ms
+[15:47:03] Starting &#39;build:images&#39;...
+[15:47:03] Finished &#39;build:images&#39; after 82 ms
+[15:47:03] Starting &#39;build:js&#39;...
+[15:47:03] Finished &#39;build:js&#39; after 384 ms
+[15:47:03] Starting &#39;build:elements_js&#39;...
+[15:47:03] Finished &#39;build:elements_js&#39; after 13 ms
+[15:47:03] Starting &#39;build:vulcanize&#39;...
+[15:47:07] Finished &#39;build:vulcanize&#39; after 3.41 s
+[15:47:07] Finished &#39;build&#39; after 4.37 s
+[15:47:07] Starting &#39;watch&#39;...
+[15:47:07] Starting &#39;&lt;anonymous&gt;&#39;...
+[15:47:07] Starting &#39;watch:css&#39;...
+[15:47:07] Starting &#39;watch:html&#39;...
+[15:47:07] Starting &#39;watch:images&#39;...
+[15:47:07] Starting &#39;watch:js&#39;...
+[15:47:07] Webserver started at http://localhost:8000
+[15:47:07] Finished &#39;&lt;anonymous&gt;&#39; after 42 ms</code></pre>
+<p>Sample image:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/fef2c2589094357a.png"></p>
+<p>If everything work as expected, hit <strong>ctrl + C</strong> to stop the instance.</p>
+<h2 is-upgraded>(preview this template to see the markup in action)</h2>
+<p>When you want to put inline code, <code>use the Courier New font like this!</code></p>
+<p>If you want to include a code block, which has a copy button, create a 1x1 table and use the font Courier new:</p>
+<pre><code>//this is a code block
+%dw 2.0
+output application/json
+---
+&#34;Hello world!&#34;</code></pre>
+<p>If you want to add a warning block, add a 1x1 table with this background color (3 from the left, and 3 down in the color picker):</p>
+<aside class="warning"><p><strong>WARNING: </strong>If you see an issue with...</p>
+</aside>
+<p>If you want to do a green box, same thing but with this background color:</p>
+<aside class="special"><p><strong>Pro Tip: </strong>In Anypoint Studio 7.10 and beyond you can...</p>
+</aside>
+<p>If you want to include a button instead of a simple link, create a link and set the highlight with this green:</p>
+<p><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank"><paper-button class="colored" raised>This is a button - click me~!</paper-button></a></p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
