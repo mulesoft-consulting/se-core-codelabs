@@ -87,8 +87,24 @@ A collection of guided labs presented by MuleSoft SE Core Specialist team
 <paper-tab>Duration</paper-tab>
 </paper-tabs>
 </div>
-</div>
+<paper-dropdown-menu label="Filter by category" class="dropdown-filter" no-label-float noink no-animations>
+<paper-listbox id="categorylist" slot="dropdown-content" class="dropdown-content" on-iron-activate="onCategoryActivate" attr-for-selected="filter">
+<paper-item filter="general">general</paper-item>
+<paper-item filter="pinkpanther">pinkpanther</paper-item>
+</paper-listbox>
+</paper-dropdown-menu></div>
 <card-sorter id="cards" class="site-width">
+<a href="/codelabs/maintenance-guide-for-se-core-team-codelabs-page/index.html?index=..%2F..index" on-tap="navigate" class="codelab-card category-general" data-category="general" data-title="Maintenance Guide for SE Core team CodeLabs page" data-duration="15" data-updated="2022-04-11T06:52:49Z" data-tags="core,instruction" data-pin="">
+<div class="description">Maintenance Guide for SE Core team CodeLabs page</div>
+<div class="card-duration">
+<span>15 min </span>
+<span>Updated Apr 11, 2022</span>
+</div>
+<div class="card-footer">
+<div class="category-icon general-icon"></div>
+<paper-button class="general-bg">Start</paper-button>
+</div>
+</a>
 <a href="/codelabs/anypoint-code-builder-developer-preview-set-up/index.html?index=..%2F..index" on-tap="navigate" class="codelab-card category-pinkpanther" data-category="pinkpanther" data-title="Anypoint Code Builder Developer preview set up" data-duration="11" data-updated="2022-04-05T12:55:39Z" data-tags=",anypointcodebuilder,core" data-pin="">
 <div class="description">Anypoint Code Builder Developer preview set up</div>
 <div class="card-duration">
@@ -100,18 +116,18 @@ A collection of guided labs presented by MuleSoft SE Core Specialist team
 <paper-button class="pinkpanther-bg">Start</paper-button>
 </div>
 </a>
-<a href="/codelabs/anypoint-code-builder-developer-preview-uc1-designing-apis/index.html?index=..%2F..index" on-tap="navigate" class="codelab-card category-pinkpanther" data-category="pinkpanther" data-title="Anypoint Code Builder Walk-throughs - Use Case 1: Designing APIs" data-duration="0" data-updated="2022-04-05T13:07:14Z" data-tags=",anypointcodebuilder,core" data-pin="">
+<a href="/codelabs/anypoint-code-builder-developer-preview-uc1-designing-apis/index.html?index=..%2F..index" on-tap="navigate" class="codelab-card category-pinkpanther" data-category="pinkpanther" data-title="Anypoint Code Builder Walk-throughs - Use Case 1: Designing APIs" data-duration="0" data-updated="2022-04-07T14:18:55Z" data-tags=",anypointcodebuilder,core" data-pin="">
 <div class="description">Anypoint Code Builder Walk-throughs - Use Case 1: Designing APIs</div>
 <div class="card-duration">
 <span></span>
-<span>Updated Apr 5, 2022</span>
+<span>Updated Apr 7, 2022</span>
 </div>
 <div class="card-footer">
 <div class="category-icon pinkpanther-icon"></div>
 <paper-button class="pinkpanther-bg">Start</paper-button>
 </div>
 </a>
-<a href="/codelabs/anypoint-code-builder-walk-throughs-use-case-2-scaffold-an-api/index.html?index=..%2F..index" on-tap="navigate" class="codelab-card category-pinkpanther" data-category="pinkpanther" data-title="Anypoint Code Builder Walk-throughs - Use Case 2: Scaffold an API" data-duration="0" data-updated="2022-04-05T13:07:55Z" data-tags="anypointcodebuilder,core" data-pin="">
+<a href="/codelabs/anypoint-code-builder-walk-throughs-use-case-2-scaffold-an-api/index.html?index=..%2F..index" on-tap="navigate" class="codelab-card category-pinkpanther" data-category="pinkpanther" data-title="Anypoint Code Builder Walk-throughs - Use Case 2: Scaffold an API" data-duration="0" data-updated="2022-04-05T13:07:59Z" data-tags="anypointcodebuilder,core" data-pin="">
 <div class="description">Anypoint Code Builder Walk-throughs - Use Case 2: Scaffold an API</div>
 <div class="card-duration">
 <span></span>
