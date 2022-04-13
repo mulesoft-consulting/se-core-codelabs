@@ -1,0 +1,507 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Anypoint Code Builder Walk-throughs Use Case 4: Building an Integration</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="anypoint-code-builder-walk-throughs-use-case-4-building-an-integration"
+                  title="Anypoint Code Builder Walk-throughs Use Case 4: Building an Integration"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=anypoint-code-builder-walk-throughs-use-case-4-building-an-integration">
+    
+      <google-codelab-step label="Anypoint Code Builder - Use Case 4: Build an Integration" duration="0">
+        <p>In this section you will leverage the power of Anypoint Code builder to create a full integration project. </p>
+<h2 is-upgraded>What you&#39;ll build</h2>
+<p>In this codelab we will be covering the creation of a full integration project by connecting Salesforce, slack and email. </p>
+<p>The high-level steps we will follow are: </p>
+<ul>
+<li>Authentication to Anypoint Platform</li>
+<li>Configure a connector to Salesforce, email, slack</li>
+<li>Configure salesforce event (case) as trigger</li>
+<li>Configure a choice based on case status</li>
+<li>If escalated, send email</li>
+<li>Otherwise, send to slack</li>
+<li>Debug a Mule Application</li>
+<li>Run a Mule Application</li>
+<li>Deploy to Cloudhub</li>
+</ul>
+<p>Use case description:</p>
+<ol type="1" start="1">
+<li>The flow is triggered when a new Case is created in Salesforce</li>
+<li>If the case is &#34;escalated&#34;, send an email to the regional leader including Case Number, Origin, Reason, Priority and Status.</li>
+<li>Otherwise, send a message to a Slack channel with the same information as above</li>
+</ol>
+<p><strong>Note: </strong></p>
+<p>We will temporarily replace the slack connector by a logger as the slack connector setup and test is very involved.</p>
+<p>Screenshot from the same project in studio:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/9569b7fda3b88b10.png"></p>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<p>These steps will walk you through the full implementation of an integration project but learning how to configure connector, orchestrate data and publish your project to Anypoint Platform </p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<p>A working <strong>Anypoint Code Builder </strong>installation.</p>
+<aside class="warning"><p><strong>Note</strong>:<br>Some screenshots in this document are from the web experience using the docker image, and some are from Anypoint Code Builder running in a local Visual Studio Code installation (setup details for this will be provided soon). There are only a few UI differences that should be easy to extrapolate.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-1: Create a Mule Application" duration="0">
+        <ul>
+<li>Open command palette and search for &#34;Create a Project&#34; </li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/35daee36ade92dd3.png"></p>
+<ul>
+<li>Alternatively, expand &#34;PROJECTS&#34; and select &#34;Create a Project&#34;</li>
+</ul>
+<p class="image-container"><img style="width: 361.50px" src="img/f4dd01a5d4481a02.png"></p>
+<ul>
+<li>Select &#34;Mule Project Type&#34; </li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/53e42d019e006195.png"></p>
+<ul>
+<li>Complete <em>Project Name, runtime versions </em>(default) and<em> location</em></li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/ae09e10426f9c268.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/50d66797a9971e8f.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-2: Add config.yaml file" duration="0">
+        <ul>
+<li>Right-click the src/main/resources folder in the Explorer and select New &gt; File.</li>
+<li>Set the file name to config.yaml and hit return.</li>
+<li>Add properties for your salesforce and email connection, for example:</li>
+</ul>
+<p>salesforce:<br>        username: &#34;yourusername&#34;<br>        password: &#34;yourpassword&#34;<br>        token: &#34;yourtoken&#34;</p>
+<p>email:<br>      host: &#34;youremailhost&#34;<br>         username: &#34;youremailusername&#34;<br>         password: &#34;youremailpassword&#34;</p>
+<p>For gmail, the email host is smtp.gmail.com.</p>
+<ul>
+<li>Back in new-case-salesforce.xml, add the following, using auto-complete:<br>&lt;configuration-properties file=&#34;config.yaml&#34; /&gt;</li>
+</ul>
+<p class="image-container"><img style="width: 381.50px" src="img/79efb177c07f8e30.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-3: Configure Salesforce Connector" duration="0">
+        <p>The following connectors are included with the docker image. If you want to use additional connectors, import them from Exchange:</p>
+<ul>
+<li>Email (1.4.2)</li>
+<li>HTTP (1.6.0)</li>
+<li>Sockets (1.2.2)</li>
+<li>API Kit (1.5.6)</li>
+<li>Salesforce (10.13.0)</li>
+<li>NetSuite (11.5.0)</li>
+<li>Slack (1.0.6)</li>
+</ul>
+<p>Using auto-complete, add the salesforce connector (feel free to use the snippet)</p>
+<p class="image-container"><img style="width: 485.50px" src="img/4d99528a01f4a7ec.png"></p>
+<ul>
+<li>Change name if desired</li>
+</ul>
+<p><code><salesforce:sfdc-config</code> <code>name="Salesforce_Config"</code> <code>></code></p>
+<p><code><salesforce:basic-connection</code> <code>username="${salesforce.username}"</code> <code>password="${salesforce.password}"</code> <code>securityToken="${salesforce.token}"/></code></p>
+<p><code></salesforce:sfdc-config></code></p>
+<ul>
+<li>If you used the snippet, you will already have the basic authentication section included</li>
+<li>Set your salesforce username, password and token based on the definition in config.yaml</li>
+</ul>
+<p>&lt;salesforce:sfdc-config name=&#34;Salesforce_Config&#34; &gt;</p>
+<p>               &lt;salesforce:basic-connection username=&#34;${salesforce.username}&#34; password=&#34;${salesforce.password}&#34; securityToken=&#34;${salesforce.token}&#34;/&gt;</p>
+<p>   &lt;/salesforce:sfdc-config&gt;</p>
+<p>When you hover of the properties of the connection, you can now see the values:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/b3f5531f1b3cd59.png"></p>
+<p>Test your connection. </p>
+<h2 is-upgraded><img style="width: 479.50px" src="img/785d2d93dec96cf3.png"></h2>
+<ul>
+<li>Click on the button &#34;Test Connection&#34; (it&#39;s officially called a &#34;code lens&#34;) and you will see</li>
+</ul>
+<p class="image-container"><img style="width: 353.52px" src="img/f27f0b921f876d57.png"></p>
+<ul>
+<li>If your connection is valid, you will see</li>
+</ul>
+<p class="image-container"><img style="width: 247.50px" src="img/35a91619093d7f50.png"></p>
+<ul>
+<li>Otherwise:</li>
+</ul>
+<p class="image-container"><img style="width: 415.69px" src="img/c3131cba2f87ce7f.png"></p>
+<p>You may get an error like this:</p>
+<p class="image-container"><img style="width: 332.77px" src="img/fca9a2a7d92e5dc9.png"></p>
+<p>Note the warning because the connection has not been used anywhere yet:<br></p>
+<p class="image-container"><img style="width: 624.00px" src="img/995181df707a015.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-4: Add Salesforce Trigger" duration="0">
+        <ul>
+<li>Add a new flow</li>
+</ul>
+<p class="image-container"><img style="width: 301.50px" src="img/805f0a19b7c02228.png"></p>
+<ul>
+<li>Change the flow name to something like &#34;​NewSalesforceCaseFlow&#34;</li>
+<li>Within the flow, add<br>salesforce:new-object-listener</li>
+</ul>
+<p class="image-container"><img style="width: 469.50px" src="img/a5d54c64a0364fd4.png"></p>
+<ul>
+<li>You will see</li>
+</ul>
+<p class="image-container"><img style="width: 369.50px" src="img/bc45b623f765dac1.png"></p>
+<ul>
+<li>Change &#34;config-ref&#34; to the name of your previously defined connection, and &#34;objectType&#34; to &#34;Case&#34;</li>
+<li>Set the frequency to 1000 milliseconds or a value of your choice</li>
+</ul>
+<p>&lt;flow name=&#34;NewSalesforceCaseFlow&#34; &gt;</p>
+<p>  &lt;salesforce:new-object-listener objectType=&#34;Case&#34; config-ref=&#34;Salesforce_Config&#34; &gt;</p>
+<p>    &lt;scheduling-strategy &gt;</p>
+<p>      &lt;fixed-frequency frequency=&#34;1000&#34;/&gt;</p>
+<p>    &lt;/scheduling-strategy&gt;</p>
+<p>  &lt;/salesforce:new-object-listener&gt;</p>
+<p> &lt;/flow&gt;</p>
+<ul>
+<li>Add a &#34;logger&#34; to output the payload</li>
+</ul>
+<p><code><logger</code> <code>level="INFO"</code> <code>message='#["New salesforce case received"]'/></code></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-5: Debug the Mule Application" duration="0">
+        <ul>
+<li>Set a breakpoint in the logger line.</li>
+<li>Go to &#34;Run and Debug&#34; on the left menu</li>
+</ul>
+<p class="image-container"><img style="width: 167.00px" src="img/acc3867564d6b4de.png"></p>
+<ul>
+<li>See the breakpoint you set at the bottom:</li>
+</ul>
+<p class="image-container"><img style="width: 336.50px" src="img/96428b6de5136fd9.png"></p>
+<ul>
+<li>Click on the green arrow to the left of &#34;Debug Mule Application&#34;</li>
+</ul>
+<p class="image-container"><img style="width: 312.00px" src="img/b310180a49680177.png"></p>
+<ul>
+<li>Watch the output under &#34;Terminal&#34;</li>
+</ul>
+<p>Your project has been successfully compiled when you see </p>
+<p class="image-container"><img style="width: 624.00px" src="img/3382dc7caa4d229.png"></p>
+<ul>
+<li>Log into your salesforce instance</li>
+<li>Click on the menu under the cloud and select &#34;Service&#34;</li>
+</ul>
+<p class="image-container"><img style="width: 287.06px" src="img/ac04f9b1cd454e25.png"></p>
+<ul>
+<li>Create a new case</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/a5404925b29fa3d5.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/7c3ea70d89c8000f.png"></p>
+<ul>
+<li>Your project will look like below when it has stopped at your breakpoint</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/cb3f64ac223d4c13.png"></p>
+<ul>
+<li>Check the payload</li>
+</ul>
+<p class="image-container"><img style="width: 432.53px" src="img/8ef83ec1ab37a70d.png"></p>
+<ul>
+<li>Step over the logger</li>
+</ul>
+<p class="image-container"><img style="width: 248.50px" src="img/995f755cb7ac5954.png"></p>
+<ul>
+<li>Note the log output</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/962fb33b830ab715.png"></p>
+<p>If you want to test <em>hot deployment</em>, meaning, you want to make changes to your application without stopping and restarting the debugger, make sure the application is saved (auto-save is on by default), and you see a message like the below, before you create a new case:</p>
+<p><em>**********************************************************************</em></p>
+<p><em>* Started app &#39;new-case-salesforce-1.0.0-SNAPSHOT-mule-application&#39;  *</em></p>
+<p><em>* Application plugins:                                               *</em></p>
+<p><em>*  - ObjectStore : 1.1.6                                             *</em></p>
+<p><em>*  - Salesforce : 10.13.0                                            *</em></p>
+<p><em>**********************************************************************</em></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-6: Extract values from payload" duration="0">
+        <ul>
+<li>After the salesforce trigger, use a transform processor o assign the following values to three variables:</li>
+</ul>
+<ol type="1" start="1">
+<li>Assign the status of the case to variable &#34;<em>casestatus</em>&#34;</li>
+<li>Assign case number to variable &#34;<em>casenumber</em>&#34;</li>
+<li>Assign the slack channel to variable &#34;<em>slackchannel</em>&#34; (this variable will be used once we add the slack connector</li>
+</ol>
+<p><code><ee:transform></code></p>
+<p><code><ee:variables></code></p>
+<p><code><ee:set-variable</code> <code>variableName="casestatus">payload.Status</ee:set-variable></code></p>
+<p><code><ee:set-variable</code> <code>variableName="casenumber">payload.CaseNumber</ee:set-variable></code></p>
+<p><code><ee:set-variable</code> <code>variableName="slackchannel">"customer-support"</ee:set-variable></code></p>
+<p><code></ee:variables></code></p>
+<p><code></ee:transform></code></p>
+<ul>
+<li>You should see the variable values when debugging</li>
+</ul>
+<p class="image-container"><img style="width: 525.50px" src="img/28e965a01a9735b3.png"></p>
+<ul>
+<li>Add &#34;set-payload&#34; to concatenate case number, case origin, case reason, case priority and case status:</li>
+</ul>
+<p><code><set-payload</code> <code>value='#["Case Number: " ++ (payload.CaseNumber default</code> <code>"") ++  ", Origin: " ++ (payload.Origin default</code> <code>"") ++ ", Case Reason: " ++ (payload.Reason default</code> <code>"") ++ ", Priority: " ++ (payload.Priority default</code> <code>"") ++ ", Status: " ++ (payload.Status default</code> <code>"")]'/></code></p>
+<ul>
+<li>Add a logger to log the payload</li>
+</ul>
+<p><code><flow</code> <code>name="NewSalesforceCaseFlow"</code> <code>></code></p>
+<p><code><salesforce:new-object-listener</code> <code>objectType="Case"</code> <code>config-ref="Salesforce_Config"</code> <code>></code></p>
+<p><code><scheduling-strategy</code> <code>></code></p>
+<p><code><fixed-frequency</code> <code>frequency="1000"/></code></p>
+<p><code></scheduling-strategy></code></p>
+<p><code></salesforce:new-object-listener></code></p>
+<p><code><ee:transform></code></p>
+<p><code><ee:variables></code></p>
+<p><code><ee:set-variable</code> <code>variableName="casestatus">payload.Status</ee:set-variable></code></p>
+<p><code><ee:set-variable</code> <code>variableName="casenumber">payload.CaseNumber</ee:set-variable></code></p>
+<p><code><ee:set-variable</code> <code>variableName="slackchannel">"customer-support"</ee:set-variable></code></p>
+<p><code></ee:variables></code></p>
+<p><code></ee:transform></code></p>
+<p><code><set-payload</code> <code>value='#["Case Number: " ++ (payload.CaseNumber default</code> <code>"") ++  ", Origin: " ++ (payload.Origin default</code> <code>"") ++ ", Case Reason: " ++ (payload.Reason default</code> <code>"") ++ ", Priority: " ++ (payload.Priority default</code> <code>"") ++ ", Status: " ++ (payload.Status default</code> <code>"")]'/></code></p>
+<p><code><logger</code> <code>level="INFO"</code> <code>message="#[payload]"/></code></p>
+<p><code></flow></code></p>
+<p>Keep debugging the application.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-7: Add a Choice" duration="0">
+        <p>If the salesforce case has been escalated, we will send an email to the regional leader, otherwise we will send a message to slack. For now, we will simulate slack by using a logger.</p>
+<ul>
+<li>Add a choice after the logger</li>
+<li>Use the &#34;choice&#34; snippet</li>
+</ul>
+<p class="image-container"><img style="width: 379.00px" src="img/f7df0bfa525f081d.png"></p>
+<p><code><choice></code></p>
+<p><code><when</code> <code>expression='#[]'></code></p>
+<p><code></when></code></p>
+<p><code><otherwise></code></p>
+<p><code></otherwi</code></p>
+<ul>
+<li>Define the &#34;when&#34; branch to be executed if variable &#34;casestatus&#34; equals &#34;Escalated&#34;</li>
+<li>Add a logger to the &#34;otherwise&#34; branch with message &#34;​​<em>#[&#34;Please look into this new Case&#34; ++ payload]</em>&#34;</li>
+</ul>
+<p><code><choice></code></p>
+<p><code><when</code> <code>expression='#[vars.casestatus == "Escalated"]'></code></p>
+<p><code></when></code></p>
+<p><code><otherwise></code></p>
+<p><code><logger</code> <code>level="INFO"</code> <code>message='#["Please look into this new Case: " ++ payload]'/></code></p>
+<p><code></otherwise></code></p>
+<p><code></choice></code></p>
+<p>If you try to run this, you will get a compile error telling you that the &#34;when&#34; branch is not complete.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-8: Add Email connector" duration="0">
+        <p><strong>Note</strong>:</p>
+<p><br>Anypoint Code Builder currently does not support multi factor authentication. Please use an email configuration without MFA.</p>
+<p>Refer to this article about setting up your gmail account for use with the MuleSoft email connector:</p>
+<p><a href="https://docs.mulesoft.com/email-connector/1.5/email-gmail" target="_blank">Enable Less Secure Apps in Your Gmail Account</a>.</p>
+<p>The following steps assume you&#39;re using gmail:</p>
+<p>Using auto-complete, below the salesforce connector configuration, add the &#34;Email:smtp&#34; snippet:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d66dc8f9c1514d9a.png"></p>
+<p>You will get:</p>
+<p><code><email:smtp-config</code> <code>name="Email_SMTP"></code></p>
+<p><code><email:smtps-connection</code> <code>host="${email.host}"</code> <code>user="${email.username}"</code> <code>password="${email.password}"></code></p>
+<p><code><tls:context></code></p>
+<p><code><tls:trust-store</code> <code>insecure="true"</code> <code>/></code></p>
+<p><code></tls:context></code></p>
+<p><code></email:smtps-connection></code></p>
+<p><code></email:smtp-config></code></p>
+<ul>
+<li>Change the name to a name of your choice if desired</li>
+<li>Double check that your config.yaml properties are spelled exactly the same as what you see in the snippet</li>
+<li>Add &#34;send email&#34; to the &#34;when&#34; branch with the following values:</li>
+<li>Subject: <em>&#39;#[&#34;Case &#34; ++ vars.casenumber ++ &#34; was escalated&#34;]</em></li>
+<li>To-address: your email address</li>
+<li>Body: <em>#[&#34;Please handle this case. &#34; ++ payload]</em></li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/af8de86ad334b0d8.png"></p>
+<p><code><email:send</code> <code>config-ref="Email_SMTP"</code> <code>subject='#["Case " ++ vars.casenumber ++ " was escalated"]'></code></p>
+<p><code><email:to-addresses></code></p>
+<p><code><email:to-address</code> <code>value="pinkpanther@mulesoft.com"</code> <code>/></code></p>
+<p><code></email:to-addresses></code></p>
+<p><code><email:body</code> <code>contentType="text/html"</code> <code>></code></p>
+<p><code><email:content</code> <code>><![CDATA[#["Please handle this case. " ++ payload]]]></email:content></code></p>
+<p><code></email:body></code></p>
+<p><code></email:send></code></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 4-9: Debug the Mule Application" duration="0">
+        <ul>
+<li>Set a breakpoint in the first &#34;set-variable&#34; line.</li>
+<li>Go to &#34;Run and Debug&#34; on the left menu</li>
+</ul>
+<p class="image-container"><img style="width: 195.97px" src="img/acc3867564d6b4de.png"></p>
+<ul>
+<li>See the breakpoint you set at the bottom:</li>
+</ul>
+<p class="image-container"><img style="width: 336.50px" src="img/96428b6de5136fd9.png"></p>
+<ul>
+<li>Click on the green arrow to the left of &#34;Debug Mule Application&#34;</li>
+</ul>
+<p class="image-container"><img style="width: 312.00px" src="img/b310180a49680177.png"></p>
+<ul>
+<li>Watch the output under &#34;Terminal&#34;</li>
+</ul>
+<p>Your project has been successfully compiled when you see </p>
+<p class="image-container"><img style="width: 624.00px" src="img/3382dc7caa4d229.png"></p>
+<ul>
+<li>Log into your salesforce instance</li>
+<li>Click on the menu under the cloud and select &#34;Service&#34;</li>
+</ul>
+<p class="image-container"><img style="width: 287.06px" src="img/ac04f9b1cd454e25.png"></p>
+<ul>
+<li>Create a new case</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/a5404925b29fa3d5.png"></p>
+<ul>
+<li>Make sure to set &#34;Case Reason&#34;, &#34;Status and &#34;Case Origin&#34;.</li>
+<li>Try with &#34;case&#34; = &#34;New&#34; and &#34;Escalated&#34;</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/7c3ea70d89c8000f.png"></p>
+<ul>
+<li>Your project will look like below when it has stopped at your breakpoint</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/75c4a718a72b40ea.png"></p>
+<ul>
+<li>Check Variables and payload</li>
+</ul>
+<p class="image-container"><img style="width: 421.43px" src="img/89924c6da683f41a.png"></p>
+<ul>
+<li>Step over a few times and watch variables and payload change</li>
+</ul>
+<p class="image-container"><img style="width: 248.50px" src="img/995f755cb7ac5954.png"></p>
+<p class="image-container"><img style="width: 446.50px" src="img/c7530b01b61c8744.png"></p>
+<ul>
+<li>Note the log output</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/254c4d2f1473e64a.png"></p>
+<ul>
+<li>Step into the choice</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/8da402027a19236e.png"></p>
+<ul>
+<li>Step through to the end and make sure you received the email if the case was escalated</li>
+<li>Try different variations, add watches, add conditional breakpoints and make yourself familiar with the debugger functionality</li>
+</ul>
+<p>You should see an email like this if the case has been escalated:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/e561d555cb7a6b6b.png"></p>
+<p>Optional:</p>
+<ul>
+<li>Add error handlers and test those</li>
+</ul>
+<h2 is-upgraded>Walkthrough 4-10: Deploy the Mule Application to Cloud Hub</h2>
+<ul>
+<li>Open the command palette and search <em>Deploy</em></li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/3003ccec58730a04.png"></p>
+<ul>
+<li>If you&#39;re not logged into Anypoint platform, you will be asked to log in with your credentials</li>
+</ul>
+<p class="image-container"><img style="width: 570.50px" src="img/2fc04ed7a4f70cc2.png"></p>
+<ul>
+<li>Deployment to CloudHub requires a deploy.json file to exist under /resources folder. You will be asked to create one in case it doesn&#39;t exist.</li>
+</ul>
+<p class="image-container"><img style="width: 396.50px" src="img/9d8f573051b8a6fc.png"></p>
+<ul>
+<li>You can create the file by clicking on the &#34;Create a deploy configuration file instead&#34; button.</li>
+<li>Clicking on the button will create a deploy.json file with all the required fields (see below) pre-filled with some default values based on the CloudHub API. This file should have enough information to deploy an application properly.</li>
+</ul>
+<p class="image-container"><img style="width: 374.50px" src="img/18779a7b3cc30733.png"></p>
+<ul>
+<li>Add content to the file to specify the deployment options. Below you can see an example of the content that is to be added to the file. Not all of the content is mandatory.<br>You can add properties and look for example values, possible values or the default value with the autocomplete feature (cmd+space).</li>
+</ul>
+<ol type="1" start="1">
+<li>Required</li>
+</ol>
+<ol type="1" start="1">
+<li>applicationName: Indicates the application name that will be used on Cloudhub to deploy the application. Does not need to match the application name.</li>
+<li>runtime: The version of the Mule runtime to be used for deploying the application.</li>
+<li>workers: Amount of workers to be used for the application</li>
+<li>workerSize: Type or Size of the workers to be used (Valid values are 0.1, 0.2, 1, 2, 4)</li>
+<li>autoStart: Option to start the application after deployment.</li>
+</ol>
+<ol type="1" start="2">
+<li>Optional</li>
+</ol>
+<ol type="1" start="1">
+<li>monitoringEnabled</li>
+<li>monitoringAutoRestart</li>
+<li>persistentQueues</li>
+<li>persistentQueuesEncrypted</li>
+<li>loggingNgEnabled</li>
+<li>region</li>
+</ol>
+<p>{</p>
+<p>    &#34;applicationName&#34;:&#34;myapp&#34;,</p>
+<p>    &#34;runtime&#34;: &#34;4.3.0&#34;,</p>
+<p>    &#34;workers&#34;: 1,</p>
+<p>    &#34;workerSize&#34;: 0.1,</p>
+<p>    &#34;autoStart&#34;: true,</p>
+<p>    &#34;monitoringEnabled&#34;:true,</p>
+<p>    &#34;monitoringAutoRestart&#34;:true,</p>
+<p>    &#34;persistentQueues&#34;:false,</p>
+<p>    &#34;persistentQueuesEncrypted&#34;:false,</p>
+<p>    &#34;loggingNgEnabled&#34;:true,</p>
+<p>    &#34;region&#34;:&#34;us-east-1&#34;</p>
+<p>}</p>
+<ul>
+<li>Whenever editing or adding a property, the property and it&#39;s value will be validated and you&#39;ll see if it&#39;s valid or not. If it&#39;s invalid it will be underlined with a yellow line. If you hover it or you look into the &#34;Problems&#34; tab at the bottom of VSCode, you&#39;ll be able to see why this value is invalid.<br><img style="width: 476.28px" src="img/131a81a9d7032ecc.png"></li>
+<li>Once the file is properly configured, you will have to execute the command again. This time you will be asked to pick in which environment you want to deploy (If you don&#39;t have access the deploy will fail and you will be notified)</li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/d0b1195142a505ee.png"></p>
+<ul>
+<li><em>The application will start the packaging process which is required before deploying the application (it might take a while if the application wasn&#39;t packaged before)</em></li>
+</ul>
+<p class="image-container"><img style="width: 624.00px" src="img/537771cf8758b6b4.png"></p>
+<ul>
+<li>After packaging completes, the application will start deploying to CloudHub. When the upload is complete you will see the result on screen.<img style="width: 624.00px" src="img/4180cd3387e5d1c7.png"></li>
+<li>In case something is wrong with the deployment values specified on &#34;deploy.json&#34; or an error happens on CloudHub side, you will see an error indicating the problem that will help you make the required changes if possible.<img style="width: 624.00px" src="img/cec1fb199c87cc0a.png"></li>
+<li>Other considerations:</li>
+</ul>
+<ol type="1" start="1">
+<li>Although re-deploying applications is possible, it is not currently implemented. This way trying to deploy an application with the same name will result in an error (WIP)</li>
+<li>The values used for deploy in deploy.json will have autocompletion to help the user generate a valid file (WIP)</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
