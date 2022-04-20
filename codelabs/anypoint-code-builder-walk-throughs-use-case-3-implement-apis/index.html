@@ -1,0 +1,841 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Anypoint Code Builder Walk-throughs - Use Case 3: Implement APIs</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="{{labAnalytics}}"
+                  id="anypoint-code-builder-walk-throughs-use-case-3-implement-apis"
+                  title="Anypoint Code Builder Walk-throughs - Use Case 3: Implement APIs"
+                  environment="web"
+                  feedback-link="https://docs.google.com/forms/d/e/1FAIpQLScVaeTQSQ0FfBO_b2GPc47hiJIJTxQnl6FQAVubWtBD_FbGSg/viewform?usp=pp_url&amp;entry.530463766=anypoint-code-builder-walk-throughs-use-case-3-implement-apis">
+    
+      <google-codelab-step label="Objectives" duration="0">
+        <p>In this section we will cover implementing APIs with <strong>Anypoint Code Builder</strong>.</p>
+<h2 is-upgraded>What you&#39;ll build</h2>
+<p>In this codelab, we will cover the implementation phase of the API life-cycle. Specifically, the topics will include</p>
+<ul>
+<li>Authentication to Anypoint Platform</li>
+<li>Creating an API Implementation from scratch</li>
+<li>Adding dependencies from Exchange</li>
+<li>Scaffolding an API</li>
+<li>Adding and configuring connectors to Salesforce and Database </li>
+<li>Develop a transformation through the power of DataWeave</li>
+<li>Running and debugging the application</li>
+<li>Deploying to Cloudhub</li>
+</ul>
+<h2 class="checklist" is-upgraded>What you&#39;ll learn</h2>
+<p>The use-case for this section is around synchronizing contact details between a database and Salesforce. </p>
+<p>For this purpose, we will create a <strong>Contact Synchronization API</strong> that will contain one flow to perform the following tasks:</p>
+<ul>
+<li>Fetch the contact in Salesforce containing the phone number to change/update, if it exists</li>
+<li>Validate the contact exists in Salesforce by using <code>first name</code>+<code>last name</code></li>
+<li>If the contact already exists in Salesforce, then</li>
+<li>Update phone number in Salesforce</li>
+<li>Update phone number in Database - again if the contact exists, otherwise create it</li>
+<li>Return a response indicating success</li>
+<li>Otherwise: Create response indicating contact doesn&#39;t exist</li>
+</ul>
+<p>The overall flow is shown below</p>
+<p class="image-container"><img style="width: 624.00px" src="img/655b2c6026067cb9.png"></p>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<p>For this codelabs, you will need:</p>
+<ul>
+<li>A working <strong>Anypoint Code Builder </strong>installation</li>
+<li>a Salesforce demo environment to fetch contacts </li>
+<li>A database where contact records are stored</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-0: Prepare Salesforce and Database" duration="0">
+        <h2 is-upgraded>Setting up Salesforce</h2>
+<aside class="warning"><p><strong>Note: </strong>Some attendees reported that this step is not necessary and that they were able to use an existing &#34;Id&#34; field. Feel free to test that first before you follow the steps below</p>
+</aside>
+<p>To perform an upsert operation in Salesforce, an <code>External ID</code> is required on the target object. Follow this article to create it (for example <code>ContactKey</code>) if you don&#39;t already have one:</p>
+<p><a href="https://help.mulesoft.com/s/article/How-To-Upsert-With-Salesforce-Connector-With-Mule-4" target="_blank">https://help.mulesoft.com/s/article/How-To-Upsert-With-Salesforce-Connector-With-Mule-4</a>.</p>
+<p>Create several <strong>contacts</strong> in Salesforce that can be used for testing. Make sure you set first name, last name, and the phone number.</p>
+<h2 is-upgraded>Setting up the Database</h2>
+<p>In a database of your choice - we will be using MySQL, create a table <code>Contacts</code> with the following columns:</p>
+<ul>
+<li><code>FirstName</code></li>
+<li><code>LastName</code></li>
+<li><code>PhoneNumber</code></li>
+</ul>
+<p>If you are using MySQL, feel free to execute the SQL script below:</p>
+<p><code>create-table.sql</code></p>
+<pre><code>CREATE TABLE `Contacts` ( `FirstName` VARCHAR(255) NOT NULL , `LastName` VARCHAR(255) NOT NULL , `PhoneNumber` BIGINT NOT NULL )</code></pre>
+<p>Finally, you can either add records so they will be later updated by the flow or create them through the Mule application.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-1: Create the Contact Synchronization API" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will create a new API specification, which is covered in the Document Use-Case 1.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A working installation of <strong>Anypoint Code Builder</strong></li>
+<li>An account in <strong>Anypoint Platform</strong></li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<p>In <strong>Anypoint Code Builder</strong>, create an API that takes as input &#34;phone number&#34;, &#34;first name&#34;, &#34;last name&#34; and returns &#34;success&#34; or &#34;failure. You can create your own, or use the API below:</p>
+<pre><code>#%RAML 1.0
+title: NewContactSync
+mediaType:
+ - application/json
+version: 1.0
+protocols:
+ - http
+ - https
+/updatePhone:
+ post:
+   queryParameters:
+     phoneNumber:
+       type: number
+       example: 5555555555
+       required: true
+     firstName:
+       type: string
+       example: Anna
+       required: true
+     lastName:
+       type: string
+       example: Woods
+       required: true
+   displayName: update
+   responses:
+     200:
+       body:
+         type: string
+         example: success</code></pre>
+<p>Commit your changes and push them to <strong>Design Center</strong>. Feel free to test your API with the <strong>Mocking Service</strong>, and finally publish it to <strong>Anypoint Exchange</strong>.</p>
+<p>That&#39;s it! You are now ready to move on to the next section.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-2: Create a Mule Application" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will create a new Mule application, which will contain the flow used to update the information in both backends, Salesforce and database.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A working installation of <strong>Anypoint Code Builder</strong></li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<h3 is-upgraded>Creating the Mule project</h3>
+<p>Open the <strong>Command palette </strong>(<em>OSX</em>: ⌘⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code>) and search for <em>Create a Project</em></p>
+<p class="image-container"><img style="width: 793.91px" src="img/35daee36ade92dd3.png"></p>
+<p>Alternatively, expand the <strong>Projects</strong> section in the <strong>Explorer</strong> view and press <code>Create a Project</code></p>
+<p class="image-container"><img style="width: 361.50px" src="img/f4dd01a5d4481a02.png"></p>
+<p>This action will bring about a new wizard-type prompt. The first action requires you to select the type of project to create, in this case <em>Mule Project Type</em>:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/53e42d019e006195.png"></p>
+<p>The next prompt is on the <em>Project Name</em>, the <em>runtime version </em>(default) and the <em>location</em> where to store the project</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d79cfa538ccfeff2.png"></p>
+<p class="image-container"><img style="width: 624.00px" src="img/5609bb5684c4a7a7.png"></p>
+<h3 is-upgraded>Adding DataWeave dependencies</h3>
+<p>Add the following <strong>DataWeave</strong> dependencies to the <code>pom.xml</code> created during project creation</p>
+<pre><code>&lt;dependencies&gt;
+ &lt;dependency&gt;
+   &lt;groupId&gt;org.mule.weave&lt;/groupId&gt;
+   &lt;artifactId&gt;runtime&lt;/artifactId&gt;
+   &lt;version&gt;2.4.0&lt;/version&gt;
+   &lt;scope&gt;provided&lt;/scope&gt;
+ &lt;/dependency&gt;
+ &lt;dependency&gt;
+   &lt;groupId&gt;org.mule.weave&lt;/groupId&gt;
+   &lt;artifactId&gt;core-modules&lt;/artifactId&gt;
+   &lt;version&gt;2.4.0&lt;/version&gt;
+   &lt;scope&gt;provided&lt;/scope&gt;
+ &lt;/dependency&gt;
+ &lt;dependency&gt;
+   &lt;groupId&gt;org.mule.weave&lt;/groupId&gt;
+   &lt;artifactId&gt;java-module&lt;/artifactId&gt;
+   &lt;version&gt;2.4.0&lt;/version&gt;
+   &lt;scope&gt;provided&lt;/scope&gt;
+ &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-3: Import the previously created REST API from Anypoint Exchange" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will import the API specification previously published in <em>Walkthrough 3-1: Create the Contact Synchronization API</em> in order to scaffold the flows required to implement the API.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A working installation of <strong>Anypoint Code Builder</strong></li>
+<li>The API to scaffold published in <strong>Anypoint Exchange</strong></li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<h3 is-upgraded>Importing an asset from Anypoint Exchange</h3>
+<aside class="special"><p><strong>Note: </strong>This use case was covered in Walkthrough 2-2.</p>
+</aside>
+<p>Search for <em>Import Asset from Exchange</em> in the <strong>Command palette </strong>(<em>OSX</em>: ⌘⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code>)<br><img style="width: 624.00px" src="img/6ae3afabac77653a.png"><br></p>
+<p>And select <em>Rest API</em> to continue<br><img style="width: 624.00px" src="img/22f6284760ed8adc.png"></p>
+<p>Search for the API previously published in Walkthrough 3-1 by entering the name of the asset and and press <code>Enter</code> to start the search</p>
+<p class="image-container"><img style="width: 624.00px" src="img/d819fc597270380c.png"></p>
+<p>Any existing assets that match your search criteria will be displayed next. Choose the right API to continue</p>
+<p class="image-container"><img style="width: 624.00px" src="img/a4e7e2a1c8db7ca0.png"></p>
+<p>At this point, Anypoint Code Builder will fetch and list the published versions of the selected API. Select the latest version to continue</p>
+<p class="image-container"><img style="width: 624.00px" src="img/5fd191397ad8cb4d.png"></p>
+<p>When prompted to scaffold the API Dependency, select <em>Yes</em></p>
+<p class="image-container"><img style="width: 624.00px" src="img/97d6e788b79ce16d.png"></p>
+<p>Anypoint Code Builder will then add the dependency to the <code>pom.xml</code> file and display a series of confirmations at the bottom right of the window:</p>
+<p class="image-container"><img style="width: 384.00px" src="img/c07d93b75000582c.png"></p>
+<aside class="warning"><p><strong>Note: </strong>The scaffolding operation will create a new file using the name of your API, e.g. <strong>newcontactsync.xml</strong>. Open that file to continue the rest of the exercise if it does not open automatically.</p>
+</aside>
+<p>This concludes this section. In the next ones, we will create a configuration file and add the connectors to our backend systems.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-4: Add a configuration file" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>One of the best practices when working with connectors is to reference configuration files, as these properties can then be changed when deploying to the various target environments. In this section we will learn how to create this configuration file.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A working installation of <strong>Anypoint Code Builder</strong></li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<h3 is-upgraded>Create a <code>config.yaml</code> file</h3>
+<p>In the left <strong>Explorer view</strong>, right-click the <code>src/main/resources</code> folder and select <code>New > File</code>. Next, set the file name to <code>config.yaml</code> and hit <code>Enter</code>. With the newly created file opened, add the properties for your Salesforce and MySQL connections, as follows:</p>
+<pre><code>salesforce:
+ username: &#34;yourusername&#34;
+ password: &#34;yourpassword&#34;
+ token: &#34;yourtoken&#34;
+
+mysql:
+ host: &#34;yourhost&#34;
+ port: &#34;yourport&#34;
+ username: &#34;yourdbusername&#34;
+ password: &#34;yourdbpassword&#34;
+ database: &#34;yourdatabase&#34;</code></pre>
+<p>Back in <strong><code>newcontactsync.xml</code></strong> file add the following using auto-complete, right before the http listener config:</p>
+<pre><code>&lt;configuration-properties file=&#34;config.yaml&#34; /&gt;</code></pre>
+<p><br>When triggering auto-complete, Anypoint Code Builder will show the following list</p>
+<p class="image-container"><img style="width: 384.00px" src="img/76e44b7e66e088c3.png"></p>
+<p>After selecting the configuration properties from the list above, the result should be similar to the image shown below</p>
+<p class="image-container"><img style="width: 384.00px" src="img/43b52858faf39b00.png"></p>
+<p>Congratulations on creating your configuration file! We will make use of it in the next sections.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-5: Configure the Salesforce Connector" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>Now that we have our configuration file, we are ready to add the connectors for our backend systems. In this section we will learn how to use out-of-the-box connectors for our integration flows.</p>
+<p>The following connectors are included with Anypoint Code Builder. If a connector is not in this list, you can always import it from Anypoint Exchange. The out-of-the-box connectors are:</p>
+<ul>
+<li>Email (1.4.2)</li>
+<li>HTTP (1.6.0)</li>
+<li>Sockets (1.2.2)</li>
+<li>API Kit (1.5.6)</li>
+<li>Salesforce (10.13.0)</li>
+<li>NetSuite (11.5.0)</li>
+<li>Slack (1.0.6)</li>
+</ul>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A working installation of <strong>Anypoint Code Builder</strong></li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<h3 is-upgraded>Add the Salesforce connector</h3>
+<p>In the main editor window, with your Mule application file opened and using auto-complete add the Salesforce connector</p>
+<p class="image-container"><img style="width: 384.00px" src="img/4d99528a01f4a7ec.png"></p>
+<p>Feel free to copy the snippet below if desired, but do note that you will need to add the corresponding namespace at the top of the <code>XML</code> file (check the note below). You can also change the connector name if desired</p>
+<pre><code>&lt;salesforce:sfdc-config name=&#34;Salesforce_Config&#34;&gt;
+ &lt;salesforce:basic-connection username=&#34;${salesforce.username}&#34; password=&#34;${salesforce.password}&#34; securityToken=&#34;${salesforce.token}&#34; /&gt;
+&lt;/salesforce:sfdc-config&gt;</code></pre>
+<p>If you used the snippet, you will already have the basic authentication section included. If you have not, go ahead and set your Salesforce username, password and token based on the definition in config.yaml, as shown in the snippet above.</p>
+<aside class="warning"><p><strong>Note:</strong>:</p>
+<p>Using a snippet saves you a few steps, but it won&#39;t add the necessary namespaces. If you want to use the salesforce connection snippet, add these to your xml file:</p>
+<p><code>xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"</code></p>
+<p><code>xsi:schemaLocation="http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd"</code></p>
+</aside>
+<aside class="special"><p><strong>Tip: </strong>You can hover of the properties of the connector to see the values</p>
+<p class="image-container"><img style="width: 610.00px" src="img/b3f5531f1b3cd59.png"></p>
+</aside>
+<aside class="warning"><p><strong>Note: </strong>Testing a connection currently doesn&#39;t work if you created your xml file using scaffolding. We are investigating the reason.</p>
+<h2 is-upgraded><img style="width: 610.00px" src="img/785d2d93dec96cf3.png"></h2>
+</aside>
+<p><strong>Anypoint Code Builder</strong> will issue a warning if the connector is not used anywhere - we will do this in the next section</p>
+<p class="image-container"><img style="width: 624.00px" src="img/995181df707a015.png"></p>
+<p>This concludes setting up our Salesforce connector. Next is setting up the Database connector.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-6: Configure Database Connector" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will cover how to add the database connector to our Mule implementation.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A working installation of <strong>Anypoint Code Builder</strong></li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<h3 is-upgraded>Adding the database connector</h3>
+<p>The Database connector is imported from <strong>Anypoint Exchange</strong>. Below are the steps to import an asset into your project. Start by searching for <em>Import Asset from Exchange</em> in the <strong>Command palette </strong>(<em>OSX</em>: ⌘⇧+P, <em>Win</em>: <em>Ctrl</em>+<em>Shift</em>+<em>P</em> or <code>F1</code>) and select <em>Connector</em></p>
+<p class="image-container"><img style="width: 384.00px" src="img/6c4f56b6d10149e1.png"></p>
+<p>In the search prompt, enter &#34;<em>database</em>&#34; to find the right connector. When the search results are shown, select the Database Connector</p>
+<p class="image-container"><img style="width: 384.00px" src="img/6e01266e389565c.png"></p>
+<p>After <strong>Anypoint Code Builder</strong> lists all the available versions for the chosen connector, select the latest version (note that the version may be different than the one shown in the screenshot below)</p>
+<p class="image-container"><img style="width: 384.00px" src="img/bd8d37fb5483e64d.png"></p>
+<p>Now that the connector has been imported and the dependencies have been added to the <code>pom.xml</code> file, the next step is to add the required database driver dependencies. In this example, we are adding the MySQL driver dependencies (see <a href="https://docs.mulesoft.com/db-connector/1.10/database-connector-connection#configure-the-jdbc-driver" target="_blank">https://docs.mulesoft.com/db-connector/1.10/database-connector-connection#configure-the-jdbc-driver</a> for more details).</p>
+<p>To add the driver dependencies, open the pom.xml file and add the following fragment inside the <code>dependencies</code> section</p>
+<pre><code>&lt;dependency&gt;
+ &lt;groupId&gt;mysql&lt;/groupId&gt;
+ &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+ &lt;version&gt;5.1.48&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+<p>You should be left with a pom.xml file like the one shown below (the db connector version number may be different):</p>
+<p class="image-container"><img style="width: 384.00px" src="img/f6b1b5b02c62f39.png"></p>
+<p>Remember that dependencies are also listed in the <strong>Explorer view</strong>, in the bottom left, under <strong>Project Dependencies</strong></p>
+<p class="image-container"><img style="width: 384.00px" src="img/59d3da2c9b5abe1b.png"></p>
+<p>After adding the dependency, make it visible for the database connector by adding the <strong>shared libraries</strong> section in the mule maven plugin configuration (also found in the <code>pom.xml</code> file).</p>
+<p>Replace the empty <code><configuration/></code> element found in the <code>plugins</code> section</p>
+<pre><code>&lt;plugin&gt;
+ &lt;groupId&gt;org.mule.tools.maven&lt;/groupId&gt;
+ &lt;artifactId&gt;mule-maven-plugin&lt;/artifactId&gt;
+ &lt;version&gt;${mule.maven.plugin.version}&lt;/version&gt;
+ &lt;extensions&gt;true&lt;/extensions&gt;
+ &lt;configuration /&gt;
+&lt;/plugin&gt;</code></pre>
+<p>With the shared library configuration:</p>
+<pre><code>&lt;configuration&gt;
+ &lt;sharedLibraries&gt;
+   &lt;sharedLibrary&gt;
+     &lt;groupId&gt;mysql&lt;/groupId&gt;
+     &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+   &lt;/sharedLibrary&gt;
+ &lt;/sharedLibraries&gt;
+&lt;/configuration&gt;</code></pre>
+<p>For your reference, you can compare your version with the full <code>pom.xml</code> contents below:</p>
+<pre><code>&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34; standalone=&#34;no&#34;?&gt;
+&lt;project xmlns=&#34;http://maven.apache.org/POM/4.0.0&#34;
+ xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;
+ xsi:schemaLocation=&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&#34;&gt;
+ &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+ &lt;groupId&gt;com.mycompany&lt;/groupId&gt;
+ &lt;artifactId&gt;contact-sync-sfdb&lt;/artifactId&gt;
+ &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+ &lt;packaging&gt;mule-application&lt;/packaging&gt;
+ &lt;name&gt;ContactSyncSFDB&lt;/name&gt;
+ &lt;properties&gt;
+   &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+   &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+   &lt;mule.maven.plugin.version&gt;3.3.5&lt;/mule.maven.plugin.version&gt;
+ &lt;/properties&gt;
+ &lt;build&gt;
+   &lt;plugins&gt;
+     &lt;plugin&gt;
+       &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+       &lt;artifactId&gt;maven-clean-plugin&lt;/artifactId&gt;
+       &lt;version&gt;3.1.0&lt;/version&gt;
+     &lt;/plugin&gt;
+     &lt;plugin&gt;
+       &lt;groupId&gt;org.mule.tools.maven&lt;/groupId&gt;
+       &lt;artifactId&gt;mule-maven-plugin&lt;/artifactId&gt;
+       &lt;version&gt;${mule.maven.plugin.version}&lt;/version&gt;
+       &lt;extensions&gt;true&lt;/extensions&gt;
+       &lt;configuration&gt;
+         &lt;sharedLibraries&gt;
+           &lt;sharedLibrary&gt;
+             &lt;groupId&gt;mysql&lt;/groupId&gt;
+             &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+           &lt;/sharedLibrary&gt;
+         &lt;/sharedLibraries&gt;
+       &lt;/configuration&gt;
+     &lt;/plugin&gt;
+   &lt;/plugins&gt;
+ &lt;/build&gt;
+ &lt;repositories&gt;
+   &lt;repository&gt;
+     &lt;id&gt;anypoint-exchange-v2&lt;/id&gt;
+     &lt;name&gt;Anypoint Exchange&lt;/name&gt;
+     &lt;url&gt;https://maven.anypoint.mulesoft.com/api/v2/maven&lt;/url&gt;
+     &lt;layout&gt;default&lt;/layout&gt;
+   &lt;/repository&gt;
+   &lt;repository&gt;
+     &lt;id&gt;mulesoft-releases&lt;/id&gt;
+     &lt;name&gt;MuleSoft Releases Repository&lt;/name&gt;
+     &lt;url&gt;https://repository.mulesoft.org/releases/&lt;/url&gt;
+     &lt;layout&gt;default&lt;/layout&gt;
+   &lt;/repository&gt;
+ &lt;/repositories&gt;
+ &lt;pluginRepositories&gt;
+   &lt;pluginRepository&gt;
+     &lt;id&gt;mulesoft-releases&lt;/id&gt;
+     &lt;name&gt;mulesoft release repository&lt;/name&gt;
+     &lt;layout&gt;default&lt;/layout&gt;
+     &lt;url&gt;https://repository.mulesoft.org/releases/&lt;/url&gt;
+     &lt;snapshots&gt;
+       &lt;enabled&gt;false&lt;/enabled&gt;
+     &lt;/snapshots&gt;
+   &lt;/pluginRepository&gt;
+ &lt;/pluginRepositories&gt;
+ &lt;dependencies&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;org.mule.weave&lt;/groupId&gt;
+     &lt;artifactId&gt;runtime&lt;/artifactId&gt;
+     &lt;version&gt;2.4.0&lt;/version&gt;
+     &lt;scope&gt;provided&lt;/scope&gt;
+   &lt;/dependency&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;org.mule.weave&lt;/groupId&gt;
+     &lt;artifactId&gt;core-modules&lt;/artifactId&gt;
+     &lt;version&gt;2.4.0&lt;/version&gt;
+     &lt;scope&gt;provided&lt;/scope&gt;
+   &lt;/dependency&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;org.mule.weave&lt;/groupId&gt;
+     &lt;artifactId&gt;java-module&lt;/artifactId&gt;
+     &lt;version&gt;2.4.0&lt;/version&gt;
+     &lt;scope&gt;provided&lt;/scope&gt;
+   &lt;/dependency&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;30e1d780-2386-45a2-89af-74ebdc811743&lt;/groupId&gt;
+     &lt;artifactId&gt;newcontactsync&lt;/artifactId&gt;
+     &lt;version&gt;1.0.0&lt;/version&gt;
+     &lt;classifier&gt;raml&lt;/classifier&gt;
+     &lt;type&gt;zip&lt;/type&gt;
+   &lt;/dependency&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;org.mule.modules&lt;/groupId&gt;
+     &lt;artifactId&gt;mule-apikit-module&lt;/artifactId&gt;
+     &lt;version&gt;1.5.6&lt;/version&gt;
+     &lt;classifier&gt;mule-plugin&lt;/classifier&gt;
+     &lt;scope /&gt;
+   &lt;/dependency&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;com.mulesoft.connectors&lt;/groupId&gt;
+     &lt;artifactId&gt;mule-salesforce-connector&lt;/artifactId&gt;
+     &lt;version&gt;10.13.0&lt;/version&gt;
+     &lt;classifier&gt;mule-plugin&lt;/classifier&gt;
+   &lt;/dependency&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;org.mule.connectors&lt;/groupId&gt;
+     &lt;artifactId&gt;mule-db-connector&lt;/artifactId&gt;
+     &lt;version&gt;1.12.0&lt;/version&gt;
+     &lt;classifier&gt;mule-plugin&lt;/classifier&gt;
+   &lt;/dependency&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;mysql&lt;/groupId&gt;
+     &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+     &lt;version&gt;5.1.48&lt;/version&gt;
+   &lt;/dependency&gt;
+ &lt;/dependencies&gt;
+&lt;/project&gt;</code></pre>
+<p>Now add the database configuration using the values from your <code>config.yaml</code> file to the <code>newcontactsync.xml</code> file. In order to make this easier and faster, use the auto-complete feature or copy the snippet <code>db:mysql-config</code> below</p>
+<p class="image-container"><img style="width: 624.00px" src="img/262fdf2758a78373.png"></p>
+<p><code>MySQL configuration snippet</code></p>
+<pre><code>&lt;db:config name=&#34;Database_Config&#34;&gt;
+ &lt;db:my-sql-connection host=&#34;${mysql.host}&#34; port=&#34;${mysql.port}&#34; user=&#34;${mysql.username}&#34; password=&#34;${mysql.password}&#34; database=&#34;${mysql.database}&#34; /&gt;
+&lt;/db:config&gt;</code></pre>
+<aside class="warning"><p><strong>Note: </strong>If you have pasted the snippet contents, you might have to manually add the following namespace at the top of the file:</p>
+<p><code>xmlns:db="</code><a href="http://www.mulesoft.org/schema/mule/db" target="_blank"><code>http://www.mulesoft.org/schema/mule/db</code></a><code>"</code></p>
+</aside>
+<p>Manually add the following namespace:<br>xmlns:db=&#34;<a href="http://www.mulesoft.org/schema/mule/db" target="_blank">http://www.mulesoft.org/schema/mule/db</a>&#34;</p>
+<h3 is-upgraded>Troubleshooting SSL connectivity</h3>
+<p>At this point, you can build your Mule application and test it. When running the application you may end up facing a database connection error related to SSL:</p>
+<p><strong>Error type            : DB:CONNECTIVITY</strong></p>
+<p>If so, adding the following properties to the database configuration will help. Add the following snippet inside your connection configuration:</p>
+<pre><code>&lt;db:connection-properties&gt;
+ &lt;db:connection-property key=&#34;useSSL&#34; value=&#34;false&#34; /&gt;
+&lt;/db:connection-properties&gt;</code></pre>
+<p>So that the complete configuration looks like this:</p>
+<pre><code>&lt;db:config name=&#34;Database_config&#34;&gt;
+ &lt;db:my-sql-connection host=&#34;${database.host}&#34; port=&#34;${database.port}&#34; user=&#34;${database.username}&#34; password=&#34;${database.password}&#34; database=&#34;${database.database}&#34;&gt;
+   &lt;db:connection-properties&gt;
+     &lt;db:connection-property key=&#34;useSSL&#34; value=&#34;false&#34; /&gt;
+   &lt;/db:connection-properties&gt;
+ &lt;/db:my-sql-connection&gt;
+&lt;/db:config&gt;</code></pre>
+<p>We are still investigating why this is necessary.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-7: Add a Salesforce query" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>Our use-case includes finding records in Salesforce. For this to happen, and armed with our Salesforce connector already configured in previous sections, we can now proceed to add a Query processor.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A working installation of <strong>Anypoint Code Builder</strong></li>
+<li>A set of records in Salesforce to try the query</li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<p>The steps that we are following can be summarized as follows:</p>
+<ol type="1" start="1">
+<li>Building the search criteria to be used in the Salesforce query using a Transform processor</li>
+<li>Adding a Salesforce:Query processor to execute the query, saving the results in a variable</li>
+<li>Adding logic when the record is found in Salesforce using a Choice processor</li>
+</ol>
+<h3 is-upgraded>Building the search criteria</h3>
+<p>As you might recall, the way to find the record in Salesforce is by using a SOQL query like so:</p>
+<pre><code>SELECT phone, ContactKey__c from Contact WHERE FirstName=&#39;:firstname&#39; AND LastName=&#39;:lastname&#39;</code></pre>
+<p>The query above uses two query parameters, which we need to be passed: <code>firstname</code> and <code>lastname</code>. To assign values to these, we will create two variables in our flow: <code>firstnameVar</code> and <code>lastnameVar</code>, which we can do by adding a <strong>Transform</strong> processor. </p>
+<p>First, we need to locate the following <strong>Logger</strong> processor:</p>
+<pre><code>&lt;flow name=&#34;post:\updatePhone:newcontactsync-config&#34;&gt;
+ &lt;logger level=&#34;INFO&#34; message=&#34;post:\updatePhone:newcontactsync-config&#34; /&gt;
+&lt;/flow&gt;</code></pre>
+<p>Either before or after - in our case before - the Logger processor, use auto-complete to add a <strong>transform with output JSON</strong> processor:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/671da0eaf18e563d.png"></p>
+<p>This processor allows to perform several DataWeave mappings in parallel. We need 4 mappings:</p>
+<ul>
+<li>The first name of the incoming payload, mapped to the <code>firstnameVar</code> variable</li>
+<li>The last name of the incoming payload, mapped to the <code>lastnameVar</code> variable</li>
+<li>The phone number of the incoming payload, mapped to the <code>phonenumberVar</code> variable</li>
+</ul>
+<p>Use the snippet &#34;transform with output JSON&#34;</p>
+<p><code><ee:transform</code> <code>doc:name="DisplayName"</code> <code>doc:id="uniqueId"</code> <code>></code></p>
+<p><code><ee:message</code> <code>></code></p>
+<p><code><ee:set-payload</code> <code>><![CDATA[%dw</code> <code>2.0</code></p>
+<p><code>output</code> <code>application/json</code></p>
+<p><code>       ---</code></p>
+<p><code>       {</code></p>
+<p><code>           firstName : "John",</code></p>
+<p><code>           lastName : "Doe",</code></p>
+<p><code>       }]]></ee:set-payload></code></p>
+<p><code></ee:message></code></p>
+<p><code></ee:transform></code></p>
+<p>To create the 3 mappings mentioned above, add the following XML snippet to the Transform processor:</p>
+<pre><code>&lt;ee:transform&gt;
+ &lt;ee:variables&gt;
+   &lt;ee:set-variable variableName=&#34;firstnameVar&#34;&gt;
+     &lt;![CDATA[%dw 2.0 output application/java --- attributes.queryParams.firstName]]&gt;
+   &lt;/ee:set-variable&gt;
+   &lt;ee:set-variable variableName=&#34;lastnameVar&#34;&gt;
+     &lt;![CDATA[%dw 2.0 output application/java --- attributes.queryParams.lastName]]&gt;
+   &lt;/ee:set-variable&gt;
+   &lt;ee:set-variable variableName=&#34;phonenumberVar&#34;&gt;
+     &lt;![CDATA[%dw 2.0 output application/java --- attributes.queryParams.phoneNumber]]&gt;
+   &lt;/ee:set-variable&gt;
+ &lt;/ee:variables&gt;
+&lt;/ee:transform&gt;</code></pre>
+<h3 is-upgraded>Querying Salesforce</h3>
+<p>It is now time to Query the Salesforce backend to find the record, if it exists. As before, you can use auto-complete to add a new Salesforce:Query processor, as shown in the steps below.</p>
+<p>First, add a <code>salesforce:query</code> processor, which will result in the following fragment:</p>
+<p class="image-container"><img style="width: 480.00px" src="img/274c3a1bfb91c7d5.png"></p>
+<p>As we have already defined a <code>configuration</code> in a previous walkthrough, we can now reference it. Update the connection name to the one previously defined</p>
+<p class="image-container"><img style="width: 480.00px" src="img/9c5e5780fe955a2e.png"></p>
+<p>Inside the empty <code>salesforce:salesforce-query</code> add the query to search for a contact&#39;s phone number and your unique key, e.g. <code>ContactKey__c</code>, using the <code>firstnameVar</code> and <code>lastnameVar</code> variables:</p>
+<pre><code>&lt;salesforce:query config-ref=&#34;Salesforce_Config&#34;&gt;
+ &lt;salesforce:salesforce-query&gt;
+   &lt;![CDATA[SELECT phone, ContactKey__c from Contact WHERE FirstName=&#39;:firstname&#39; AND LastName=&#39;:lastname&#39;]]&gt;
+ &lt;/salesforce:salesforce-query&gt;
+ &lt;salesforce:parameters&gt;
+   &lt;![CDATA[#[output application/java
+---
+{
+ firstname : vars.firstnameVar,
+ lastname : vars.lastnameVar
+}]]]&gt;
+ &lt;/salesforce:parameters&gt;
+&lt;/salesforce:query&gt;</code></pre>
+<p>You can test your application now, if you want to - just note that you will have to set a return value as the payload. Later in the application we will set values to a variable named <strong><code>ReturnMessage</code></strong> depending on the various outcomes. </p>
+<p>For the time being, we will use a temporary value: set a temporary value to the <strong><code>ReturnMessage</code></strong> variable:</p>
+<pre><code>&lt;set-variable value=&#39;#[&#34;Intermediate testing. &#34;]&#39; variableName=&#34;ReturnMessage&#34; /&gt;</code></pre>
+<p>Add a transform at the end of the flow to return your temporary message (keep this at the end as you continue working through your use case):</p>
+<pre><code>&lt;ee:transform&gt;
+ &lt;ee:message&gt;
+   &lt;ee:set-payload&gt;
+     &lt;![CDATA[%dw 2.0 output application/json --- vars.ReturnMessage]]&gt;
+   &lt;/ee:set-payload&gt;
+ &lt;/ee:message&gt;
+&lt;/ee:transform&gt;</code></pre>
+<p>You can optionally add a logger as well, to print the value of the variable in the console:</p>
+<p>&lt;logger level=&#34;INFO&#34; message=&#39;#[vars.ReturnMessage]&#39;/&gt;</p>
+<p>To test your application follow the steps in Walkthrough 3-9: Debug the Mule Application.</p>
+<h3 is-upgraded>Adding logic</h3>
+<p>It&#39;s time to add some logic to our flow, in this case, by configuring a <strong>Choice</strong> processor. The branch chosen will depend on the conditions specified in the processor; in this case, we want to have 2 routes, based on whether a record exists in Salesforce or not.</p>
+<p>Start by adding a choice checking if the contact already exists in salesforce. Feel free to use the snippet below for the <strong>Choice</strong></p>
+<p class="image-container"><img style="width: 624.00px" src="img/d6117c7e8a6f5801.png"></p>
+<p>If you are using auto-complete, Anypoint Code Builder will paste a template for the Choice processor, adding one route that requires an expression (DataWeave expression) and a default route, followed if none of the other options are applicable.</p>
+<p class="image-container"><img style="width: 384.00px" src="img/f088f38f8e7912c2.png"></p>
+<p>As a condition for the first branch, we need to check the results of the Salesforce query. If there are any results, the <strong>Salesforce:Query</strong> processor will return an array of <strong>Contact</strong> objects.</p>
+<p>In our case, if the contact doesn&#39;t exist we return a failure message - so let&#39;s add that condition in the expression attribute:</p>
+<pre><code>&lt;choice&gt;
+ &lt;when expression=&#34;#[payload.Phone[0] != null]&#34;&gt;&lt;/when&gt;
+ &lt;otherwise&gt;&lt;/otherwise&gt;
+&lt;/choice&gt;</code></pre>
+<p>Complete the <code>otherwise</code> branch first as it is shorter than the <code>when</code> branch by</p>
+<ul>
+<li>Adding a Logger with the message &#34;<em>Contact does not exist in Salesforce</em>&#34;</li>
+<li>Use a <strong>Set Variable</strong> processor to assign the message &#34;<em>Failure: Contact does not exist in Salesforce</em>&#34; to the variable <code>ReturnMessage</code></li>
+</ul>
+<p>The final otherwise construct should be similar to this:</p>
+<pre><code>&lt;otherwise&gt;
+ &lt;logger level=&#34;INFO&#34; message=&#39;#[&#34;Contact does not exist in Salesforce&#34;]&#39; /&gt;
+ &lt;set-variable value=&#39;#[&#34;Failure: Contact does not exist in Salesforce&#34;]&#39; variableName=&#34;ReturnMessage&#34; /&gt;
+&lt;/otherwise&gt;</code></pre>
+<p>Let&#39;s work on the first branch, the one with the <code>expression</code>. Inside this branch, </p>
+<ol type="1" start="1">
+<li>Add a <code>Set Variable</code> processor to assign the value of the contact&#39;s &#34;Phone&#34; to a temporary variable named <code>phonenumberSFVar</code> </li>
+<li>Add a second <code>Set Variable</code> processor to store the unique key, e.g. &#34;<code>ContactKey__c</code>&#34; to a temporary variable named <code>IdVar</code> </li>
+<li>Add a <code>Logger</code> to print the value of the phone found in the record</li>
+<li>Finally, use a <code>Set Variable</code> to assign a temporary value to the <code>ReturnMessage</code> variable</li>
+</ol>
+<p>The result of these steps should be similar to</p>
+<pre><code>&lt;set-variable value=&#34;#[payload.Phone[0]]&#34; variableName=&#34;phonenumberSFVar&#34;/&gt;
+&lt;set-variable value=&#34;#[payload.ContactKey__c[0]]&#34; variableName=&#34;IdVar&#34;/&gt;
+&lt;logger level=&#34;INFO&#34; message=&#39;#[&#34;Existing phone number in salesforce: &#34; ++ vars.phonenumberSFVar]&#39;/&gt;
+&lt;set-variable value=&#39;#[&#34;Contact exists in Salesforce&#34;]&#39; variableName=&#34;ReturnMessage&#34;/&gt;</code></pre>
+<p>Test your application following the steps in Walkthrough 3-9: Debug the Mule Application, using an existing phone number and then a new phone number. </p>
+<aside class="special"><p><strong>Tip: </strong>Make sure that <code>ReturnVariable</code> always has a value, independent of which branch is executed.</p>
+</aside>
+<p>Congratulations, you&#39;ve reached the end of this section. In the next one, we will add the following:</p>
+<ul>
+<li>Update Salesforce if the phone number differs from the one that is stored</li>
+<li>Update the database record if it exists, otherwise create a record</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-8: Add a &#34;Scatter-Gather&#34; to store data in parallel" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>Now that we have retrieved the contact record from Salesforce, we can add logic to determine if the record needs to be updated. If it does, we need to update the stored information with the new values. In this section, we will learn how to execute requests in parallel, using a Scatter-Gather processor.</p>
+<p>The section is split in the following subsections:</p>
+<ol type="1" start="1">
+<li>Adding and configuring a Scatter-Gather processor (this one)</li>
+<li>Updating the Contact record in Salesforce</li>
+<li>Upserting a record in the Database</li>
+</ol>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>A set of records in Salesforce to update</li>
+<li>A set of records in the target database to update (records will be created if they don&#39;t exist)</li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<p>In the branch in which the Salesforce contact exists, we will update the phone number in both Salesforce and database.</p>
+<p>Start by adding a <strong>Scatter-Gather</strong> processor with 2 routes - we will implement these afterwards following this logic:</p>
+<ul>
+<li>If the new phone number is different from the one that exists in Salesforce, updated it</li>
+<li>Check if the contact exists in the database and</li>
+</ul>
+<ol type="1" start="1">
+<li>If it does not exist, create it</li>
+<li>If it exists, then upsert the phone number if needed</li>
+</ol>
+<p>You can use auto-complete to add the processor or copy the snippet below</p>
+<pre><code>&lt;scatter-gather&gt;
+ &lt;route&gt;&lt;/route&gt;
+ &lt;route&gt;&lt;/route&gt;
+&lt;/scatter-gather&gt;</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-8-1: Updating data in Salesforce" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this subsection we will implement the steps to update a record in Salesforce if it is needed. For this purpose, we will be adding 1) a logic to decide if the update is needed and 2) the operations required for this purpose, using the Salesforce connector.</p>
+<h2 is-upgraded>Getting Started</h2>
+<p>We need to check first if the record needs to be updated. In previous sections, we stored the phone number retrieved from the record in a variable named <code>phonenumberSFVar</code>. We will now compare that variable to the value received in our request payload, stored in another variable named <code>phonenumberVar</code>.</p>
+<p>For this purpose, we will first add a <strong>Choice</strong> processor, with a <strong>DataWeave</strong> expression to check if the existing and new phone numbers in Salesforce are the same. If they are the same, </p>
+<ul>
+<li>Add a <strong>Logger</strong> with the message &#34;<em>Phone number in Salesforce already up to date</em>&#34;, and</li>
+<li>Add a <strong>Set Variable</strong> to set the value &#34;<em>Phone number in Salesforce already up to date</em>. &#34; to variable <code>ReturnMessageSF</code></li>
+</ul>
+<p>In both routes of the <strong>Scatter-Gather</strong> we will use two return messages: one for Salesforce - named <code>ReturnMessageSF</code>, the other for the database, and will concatenate both afterwards to return a more comprehensive message back to the caller.</p>
+<pre><code>&lt;choice&gt;
+ &lt;when expression=&#34;#[vars.phonenumberSFVar == vars.phonenumberVar]&#34;&gt;
+   &lt;logger level=&#34;INFO&#34; message=&#39;#[&#34;Phone number in Salesforce already up to date&#34;]&#39; /&gt;
+   &lt;set-variable value=&#39;#[&#34;Phone number in Salesforce already up to date. &#34;]&#39; variableName=&#34;ReturnMessageSF&#34; /&gt;
+ &lt;/when&gt;</code></pre>
+<p>Next, in the <code>otherwise</code> branch, upsert the phone number using the variable <code>IdVar</code> and <code>ContactKey__c</code>. Log the successful update with a <strong>Logger</strong> and assign the value &#34;<em>Phone number in Salesforce successfully updated</em>. &#34; to variable <code>ReturnMessageSF</code>, as shown below:</p>
+<pre><code>&lt;otherwise&gt;
+ &lt;ee:transform&gt;
+   &lt;ee:message&gt;
+     &lt;ee:set-payload&gt;
+       &lt;![CDATA[%dw 2.0
+output application/java
+---
+[{
+     Id: payload.Id[0],
+     ContactKey__c: vars.IdVar,
+     Phone: vars.phonenumberVar
+}]]]&gt;
+     &lt;/ee:set-payload&gt;
+   &lt;/ee:message&gt;
+ &lt;/ee:transform&gt;
+ &lt;salesforce:upsert objectType=&#34;Contact&#34; externalIdFieldName=&#34;ContactKey__c&#34; config-ref=&#34;Salesforce_Config&#34; /&gt;
+ &lt;logger level=&#34;INFO&#34; message=&#39;#[&#34;Phone number in Salesforce successfully updated&#34;]&#39; /&gt;
+ &lt;set-variable value=&#39;#[&#34;Phone number in Salesforce successfully updated. &#34;]&#39; variableName=&#34;ReturnMessageSF&#34; /&gt;
+&lt;/otherwise&gt;</code></pre>
+<p>Remember to use the dw snippet for your transform:</p>
+<p class="image-container"><img style="width: 624.00px" src="img/60549d0cc5d94d50.png"></p>
+<p><code><ee:transform</code> <code>doc:name="DisplayName"</code> <code>doc:id="uniqueId"</code> <code>></code></p>
+<p><code><ee:message</code> <code>></code></p>
+<p><code><ee:set-payload</code> <code>><![CDATA[%dw 2.0</code></p>
+<p><code>output</code> <code>application/json</code></p>
+<p><code>       ---</code></p>
+<p><code>       {</code></p>
+<p><code>           firstName : "John",</code></p>
+<p><code>           lastName : "Doe",</code></p>
+<p><code>       }]]></ee:set-payload></code></p>
+<p><code></ee:message></code></p>
+<p><code></ee:transform></code></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-8-2: Updating data in the database" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this subsection we will implement the steps to insert or update a record in our target database. For this purpose, we will be adding 1) a logic to decide if an insert or an update is required and 2) the operations required for this purpose, using the Database connector.</p>
+<h2 is-upgraded>Getting Started</h2>
+<p>In the second route of the <strong>Scatter-Gather</strong>, add a Database:Query processor with the purpose of selecting all the fields from the &#34;<code>Contacts</code>&#34; table and filtering by our the contact&#39;s first and last name:</p>
+<pre><code>&lt;db:select config-ref=&#34;Database_Config&#34;&gt;
+ &lt;db:sql&gt;
+   &lt;![CDATA[SELECT * FROM Contacts WHERE FirstName = :firstname AND LastName = :lastname]]&gt;
+ &lt;/db:sql&gt;
+ &lt;db:input-parameters&gt;
+   &lt;![CDATA[#[{
+firstname: vars.firstnameVar,
+lastname: vars.lastnameVar
+}]]]&gt;
+ &lt;/db:input-parameters&gt;
+&lt;/db:select&gt;</code></pre>
+<aside class="special"><p>Note the Query parameters in the <code><db-input-parameters></code> snippet above. For this map, we are using the variables <code>firstnameVar</code> and <code>lastnameVar</code>, whose values were assigned at the beginning of our flow</p>
+</aside>
+<p>After our query has been executed, we need to add logic to decide whether we want to insert a record or update an existing one. Add a <strong>Choice</strong> to check if the contact exists in the database:</p>
+<pre><code>&lt;choice&gt;
+ &lt;when expression=&#34;#[payload.phoneNumber[0] == null]&#34;&gt;&lt;/when&gt;
+ &lt;otherwise&gt;&lt;/otherwise&gt;
+&lt;/choice&gt;</code></pre>
+<h3 is-upgraded>Inserting a row in the database</h3>
+<p>In the <code>when</code> branch, because the contact does not yet exist in the database table, insert a row with the contact details and set the &#34;ReturnMessageDB&#34; accordingly. The sequence is:</p>
+<ol type="1" start="1">
+<li>A <code>db:insert</code> processor to insert the row in the database</li>
+<li>A Logger to output a message in the console that the record has been created</li>
+<li>Setting the variable <code>ReturnMessageDB</code> with a result message to be concatenated later with the results of the Salesforce operation</li>
+</ol>
+<pre><code>&lt;db:insert config-ref=&#34;Database_Config&#34;&gt;
+ &lt;db:sql&gt;
+   &lt;![CDATA[INSERT INTO Contacts (FirstName, LastName, PhoneNumber) VALUES (:firstname, :lastname, :phone)]]&gt;
+ &lt;/db:sql&gt;
+ &lt;db:input-parameters&gt;
+   &lt;![CDATA[#[{
+firstname: vars.firstnameVar,
+lastname: vars.lastnameVar,
+phone: vars.phonenumberVar
+}]]]&gt;
+ &lt;/db:input-parameters&gt;
+&lt;/db:insert&gt;&lt;logger level=&#34;INFO&#34; message=&#39;#[&#34;Contact in database created&#34;]&#39; /&gt;&lt;set-variable value=&#39;#[&#34;Contact in database created. &#34;]&#39; variableName=&#34;ReturnMessageDB&#34; /&gt;</code></pre>
+<h3 is-upgraded>Updating a row in the database</h3>
+<p>We will now add the steps to update a record. In the <code>otherwise</code> branch, extract the phone number and assign it to a variable named <code>phonenumberDBVar</code>, casting the contact phone number as String:</p>
+<pre><code>&lt;set-variable value=&#34;#[payload.phoneNumber[0] as String]&#34; variableName=&#34;phonenumberDBVar&#34; /&gt;</code></pre>
+<p>Then add a second <strong>Choice</strong> to check if the old and the new phone number are the same. We are doing this just to inform the caller accordingly. If the numbers are the same, log and update the <code>ReturnMessageDB</code> accordingly, otherwise update the phone number in the database, log and update the <code>ReturnVariableDB</code></p>
+<pre><code>&lt;choice&gt;
+ &lt;when expression=&#34;#[vars.phonenumberDBVar == vars.phonenumberVar]&#34;&gt;
+   &lt;logger level=&#34;INFO&#34; message=&#39;#[&#34;Phone number in Database already up to date&#34;]&#39; /&gt;
+   &lt;set-variable value=&#39;#[&#34;Phone number in Database already up to date. &#34;]&#39; variableName=&#34;ReturnMessageDB&#34; /&gt;
+ &lt;/when&gt;
+ &lt;otherwise&gt;
+   &lt;db:update config-ref=&#34;Database_config&#34;&gt;
+     &lt;db:sql&gt;
+       &lt;![CDATA[UPDATE Contacts SET PhoneNumber = :Phone WHERE FirstName = :firstname AND LastName = :lastname]]&gt;
+     &lt;/db:sql&gt;
+     &lt;db:input-parameters&gt;
+       &lt;![CDATA[#[{
+firstname: vars.firstnameVar,
+lastname: vars.lastnameVar,
+Phone: vars.phonenumberVar
+}]]]&gt;
+     &lt;/db:input-parameters&gt;
+   &lt;/db:update&gt;
+   &lt;logger level=&#34;INFO&#34; message=&#39;#[&#34;Phone number in Database successfully updated&#34;]&#39; /&gt;
+   &lt;set-variable value=&#39;#[&#34;Phone number in Database successfully updated. &#34;]&#39; variableName=&#34;ReturnMessageDB&#34; /&gt;
+ &lt;/otherwise&gt;
+&lt;/choice&gt;</code></pre>
+<p>As we want to inform the caller with the appropriate message, we will now update our result variable - named <code>ReturnMessage</code> - and concatenate the values from <code>ReturnMessageSF</code> and <code>ReturnMessageDB</code>, as follows:</p>
+<pre><code>&lt;set-variable value=&#39;#[&#34;Succes: &#34; ++ vars.ReturnMessageSF ++ vars.ReturnMessageDB]&#39; variableName=&#34;ReturnMessage&#34; /&gt;</code></pre>
+<p>Congratulations on completing this section! We are now ready to move on to debugging our application, if you have not done that before.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Walkthrough 3-9: Debug the Mule Application" duration="0">
+        <h2 is-upgraded>Introduction</h2>
+<p>In this section we will use the Anypoint Code Builder debugger to test and analyze our implemented flow. If you haven&#39;t used the debugger before, feel free to go through the Debugging codelab before running this one.</p>
+<p>Please refer to <a href="https://docs.google.com/document/d/1kAixa2jikouZ3iXZILcmDXVQXtTPR91eIX7wdLyvCG8/edit#heading=h.z7x1i6gqfxk4" target="_blank">Appendix B: Debug a Mule Application</a> for an overview of debugging in Anypoint Code Builder before starting this section.</p>
+<h2 is-upgraded>Requirements</h2>
+<p>To complete this section you will need:</p>
+<ul>
+<li>Existing records in Salesforce and the database for testing</li>
+<li>The completed application flow built in the previous sections</li>
+</ul>
+<h2 is-upgraded>Getting Started</h2>
+<h3 is-upgraded>Starting the Mule application debugger</h3>
+<p>Let&#39;s start by setting a breakpoint in the first <code>set-variable</code> processor, and start the debugger by going to the <strong>Run and Debug</strong> menu on the left of the workspace. You can also open the debugger view by pressing ⇧⌘D in OSX.<img style="width: 384.00px" src="img/86619d5c0a52016a.png"></p>
+<p>You can see the full list of breakpoints in the <strong>Breakpoints</strong> panel in the <strong>Run and Debug</strong> view, at the bottom:</p>
+<p class="image-container"><img style="width: 384.00px" src="img/e394405635248bed.png"></p>
+<p>With your breakpoints set, click on the green <strong>Play</strong> button with the option <em>Debug Mule Application</em> selected. This action will start the Mule runtime.</p>
+<p class="image-container"><img style="width: 384.00px" src="img/b310180a49680177.png"></p>
+<p>If you would like to see the output of the Mule runtime, you can switch to the <strong>Output View</strong> (you can find this view in the command palette as well) and choose <strong>Terminal</strong>.</p>
+<p>If the project has been successfully compiled and ready to use, you will see the following in your terminal:<img style="width: 624.00px" src="img/54681d8c9c144aa9.png"></p>
+<h3 is-upgraded>Sending a request</h3>
+<aside class="special"><p><strong>Tip: </strong>We suggest to use <a href="https://install.advancedrestclient.com" target="_blank">Advanced REST Client</a> to test your application</p>
+</aside>
+<p>Send a <code>POST</code> request with the tool of your choice to</p>
+<p><a href="http://localhost:8081/api/updatePhone?phoneNumber=1511161515&firstName=Pink&lastName=Panther" target="_blank">http://localhost:8081/api/updatePhone?phoneNumber=1511161515&amp;firstName=Pink&amp;lastName=Panther</a></p>
+<p>Your URL may look different depending on how you designed your API and the contacts entered in Salesforce. Once the Mule runtime starts executing the flow, Anypoint Code Builder will stop at the first breakpoint:<img style="width: 624.00px" src="img/1d329b81b3d29e6.png"></p>
+<h3 is-upgraded>Using the debugger controls</h3>
+<p>From this point onwards, you can use the debugger controls shown at the top of the window. Step over a few times and check Variables and payload</p>
+<p class="image-container"><img style="width: 384.00px" src="img/995f755cb7ac5954.png"></p>
+<p>Note how the variables change every time you step forward. This information can be found in the <strong>Run and Debug</strong> view, under the <strong>Variables</strong> panel.</p>
+<p class="image-container"><img style="width: 384.00px" src="img/f7ad049478504fcb.png"></p>
+<p>Once you reach the Scatter-Gather processor you will see two debug threads under <strong>Call Stack</strong>. These correspond to the parallel routes running in parallel. You can switch between the threads.</p>
+<p class="image-container"><img style="width: 624.00px" src="img/343fb930465a3d98.png"></p>
+<p>In the <strong>Output View</strong>, note the log messages issues by the runtime whilst the flow is being executed</p>
+<p class="image-container"><img style="width: 624.00px" src="img/2b91400550967af2.png"></p>
+<p>Step through to the end of the flow and check the return status code and message for the invocation. Try different variations with the input payload to test the various possibilities, add watches, add conditional breakpoints and make yourself familiar with the debugger functionality.</p>
+<aside class="special"><p>To deploy your application in CloudHub, follow the steps in walkthrough XXX, <em>Deploy a Mule application to CloudHub</em>.</p>
+</aside>
+<p>Congratulations on completing your first flow in Anypoint Code Builder! As a summary, in this Use Case we have learned how to:</p>
+<ul>
+<li>Use an out-of-the-box connector, like Salesforce</li>
+<li>Add a new connector dependency from Anypoint Exchange</li>
+<li>Use the various connector operations to fetch and update records in Salesforce and in a database</li>
+<li>How to debug your application using the integrated debugger</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
